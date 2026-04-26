@@ -3,211 +3,292 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PyPuzzle — Python Code Puzzle</title>
+<title>PyPuzzle v3</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Kanit:wght@400;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#0f1117;--surface:#1a1d27;--surface2:#22263a;
-  --border:#2e3250;--accent:#5b6aff;--accent2:#4af0b8;
-  --text:#e8eaf6;--muted:#7b82b0;
-  --danger:#ff5b72;--warn:#ffc46a;--success:#4af0b8;
-  --code-bg:#0d0f1a;--drag:#2e3250;
+  --bg:#07090f;--surface:#0e1118;--surface2:#141824;--border:#1e2538;--border2:#2a3252;
+  --accent:#3d7fff;--ag:rgba(61,127,255,.22);--accent2:#00e5b0;--a2g:rgba(0,229,176,.18);
+  --warn:#ffb800;--danger:#ff4560;--success:#00e5b0;--text:#dde4ff;--muted:#5a6494;--muted2:#3a4060;
+  --code-bg:#060810;--fm:'JetBrains Mono',monospace;--fu:'Kanit',sans-serif;
 }
-body{font-family:'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
-
-/* HEADER */
-header{background:var(--surface);border-bottom:1px solid var(--border);padding:11px 22px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:50}
-.logo{font-size:19px;font-weight:700;color:var(--accent);letter-spacing:-0.5px}
-.logo span{color:var(--accent2)}
-.badge{font-size:10px;font-weight:700;padding:3px 9px;border-radius:99px;text-transform:uppercase;letter-spacing:.5px}
-.badge.t{background:rgba(255,196,106,.14);color:var(--warn);border:1px solid rgba(255,196,106,.3)}
-.badge.s{background:rgba(74,240,184,.11);color:var(--accent2);border:1px solid rgba(74,240,184,.25)}
+body{font-family:var(--fu);background:var(--bg);color:var(--text);min-height:100vh;
+  background-image:radial-gradient(ellipse at 15% 15%,rgba(61,127,255,.07) 0%,transparent 55%),radial-gradient(ellipse at 85% 85%,rgba(0,229,176,.05) 0%,transparent 55%);}
+header{background:rgba(14,17,24,.9);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100}
+.logo{font-family:var(--fm);font-size:17px;font-weight:700;letter-spacing:-1px}
+.logo .py{color:var(--accent)}.logo .puz{color:var(--accent2)}
+.badge{font-size:10px;font-weight:700;padding:3px 10px;border-radius:99px;text-transform:uppercase;letter-spacing:.8px;font-family:var(--fm)}
+.badge.t{background:rgba(255,184,0,.1);color:var(--warn);border:1px solid rgba(255,184,0,.25)}
+.badge.s{background:rgba(0,229,176,.1);color:var(--accent2);border:1px solid rgba(0,229,176,.25)}
+.badge.r{background:rgba(255,69,96,.1);color:var(--danger);border:1px solid rgba(255,69,96,.25)}
 .hs{flex:1}
-.py-status{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
+.py-status{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--muted);font-family:var(--fm)}
 .pydot{width:7px;height:7px;border-radius:50%;background:var(--muted);flex-shrink:0}
-.pydot.ok{background:var(--success)}
-.pydot.loading{background:var(--warn);animation:blink 1s infinite}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
-.hbtn{background:var(--surface2);border:1px solid var(--border);color:var(--muted);padding:6px 13px;border-radius:8px;cursor:pointer;font-size:13px;transition:.15s}
-.hbtn:hover{border-color:var(--accent);color:var(--accent)}
-
-.app{max-width:1200px;margin:0 auto;padding:22px 18px}
-#tp{display:block}
-#sp{display:none}
-
-/* SHARED */
-.ptitle{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:11px}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:13px;padding:18px;margin-bottom:16px}
-.card h3{font-size:14px;font-weight:600;margin-bottom:11px}
-input[type=text],textarea{width:100%;background:var(--code-bg);border:1px solid var(--border);border-radius:7px;color:var(--text);padding:8px 12px;font-size:13px;font-family:inherit;outline:none;transition:.15s}
-input[type=text]:focus,textarea:focus{border-color:var(--accent)}
-textarea{resize:vertical;min-height:54px}
-.mono{font-family:'Consolas','Courier New',monospace;font-size:13px}
-
-/* TEACHER BLOCK LIST */
-.blist{display:flex;flex-direction:column;gap:8px;margin-bottom:11px}
-.bitem{background:var(--code-bg);border:1px solid var(--drag);border-radius:9px;padding:9px 10px;display:grid;grid-template-columns:auto 1fr 1fr auto;gap:8px;align-items:start}
-.bnum{font-size:10px;color:var(--muted);font-family:monospace;padding-top:4px;min-width:20px}
-.bitem textarea{background:transparent;border:none;outline:none;padding:0;min-height:34px;font-family:'Consolas','Courier New',monospace;font-size:12.5px}
-.nick-input{background:rgba(91,106,255,.07);border:1px solid rgba(91,106,255,.25)!important;border-radius:6px;font-size:12px;color:#aab0e8;padding:5px 9px!important;min-height:unset!important}
-.nick-input::placeholder{color:rgba(170,176,232,.4)}
-.nick-input:focus{border-color:var(--accent)!important}
-.dbtn{background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:2px 5px;border-radius:5px;transition:.15s;margin-top:2px}
-.dbtn:hover{background:rgba(255,91,114,.14);color:var(--danger)}
-.abtn{background:rgba(91,106,255,.08);border:1px dashed rgba(91,106,255,.4);color:var(--accent);padding:7px;border-radius:8px;cursor:pointer;font-size:13px;width:100%;text-align:center;transition:.15s}
-.abtn:hover{background:rgba(91,106,255,.15);border-style:solid}
-.genbtn{width:100%;background:var(--accent);border:none;color:#fff;padding:11px;border-radius:10px;cursor:pointer;font-size:14px;font-weight:700;transition:.15s;margin-top:4px}
-.genbtn:hover{background:#6b79ff}
-.hint{background:rgba(255,196,106,.06);border:1px solid rgba(255,196,106,.2);border-radius:8px;padding:8px 12px;font-size:12.5px;color:var(--warn);margin-top:8px}
-#export-area{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:11px;font-family:monospace;font-size:11px;white-space:pre-wrap;color:var(--muted);margin-top:11px;word-break:break-all;display:none;max-height:140px;overflow-y:auto}
-.copybtn{background:var(--surface2);border:1px solid var(--border);color:var(--muted);padding:6px 13px;border-radius:7px;cursor:pointer;font-size:12px;margin-top:7px;transition:.15s}
-.copybtn:hover{border-color:var(--accent2);color:var(--accent2)}
-
-/* STUDENT */
-.qbox{background:var(--surface);border:1px solid var(--border);border-radius:13px;padding:15px 19px;margin-bottom:16px}
-.qbox h2{font-size:15px;font-weight:700;color:var(--warn);margin-bottom:4px}
-.qbox p{font-size:13px;color:var(--text);line-height:1.6}
-.sgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-@media(max-width:660px){.sgrid{grid-template-columns:1fr}}
-.zlabel{font-size:12px;color:var(--muted);font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:6px}
-.dot{width:7px;height:7px;border-radius:50%;display:inline-block}
-.do{background:var(--warn)}.db{background:var(--accent)}
-.dzone{min-height:190px;background:var(--surface);border:2px dashed var(--border);border-radius:13px;padding:9px;transition:.15s}
-.dzone.over{border-color:var(--accent);background:rgba(91,106,255,.1)}
-.dzone.az{border-color:rgba(91,106,255,.3)}
-
-/* DRAGGABLE BLOCK */
-.cblock{background:var(--code-bg);border:1px solid var(--drag);border-radius:9px;padding:8px 11px;margin-bottom:6px;cursor:grab;user-select:none;transition:.15s;display:flex;align-items:stretch;gap:8px;position:relative}
-.cblock:active{cursor:grabbing}
-.cblock.dragging{opacity:.3;border-style:dashed}
-.cblock:hover{border-color:var(--accent)}
-.grip{color:var(--muted);font-size:10px;flex-shrink:0;display:flex;align-items:center;padding-right:2px}
-
-/* NICK LABEL vs CODE */
-.block-display{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
-.block-nick{font-size:12px;font-weight:600;color:#aab0e8;background:rgba(91,106,255,.12);border-radius:5px;padding:2px 7px;display:inline-block;width:fit-content}
-.block-code-text{font-family:'Consolas','Courier New',monospace;font-size:12.5px;white-space:pre;overflow-x:auto;color:#c8d0f0;line-height:1.5}
-.show-code-toggle{font-size:10px;color:rgba(91,106,255,.6);cursor:pointer;margin-top:2px;width:fit-content}
-.show-code-toggle:hover{color:var(--accent)}
-
+.pydot.ok{background:var(--success);box-shadow:0 0 7px var(--accent2)}
+.pydot.loading{background:var(--warn);animation:pulse 1.2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.75)}}
+.app{max-width:1180px;margin:0 auto;padding:22px 16px}
+#tp,#sp,#rp{display:none}#tp{display:block}
+.tabnav{display:flex;gap:4px;margin-bottom:18px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:5px}
+.tabitem{flex:1;padding:9px 14px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;text-align:center;transition:.15s;color:var(--muted);border:1px solid transparent}
+.tabitem:hover{color:var(--text);background:var(--surface2)}
+.tabitem.active{background:var(--surface2);border-color:var(--border2);color:var(--text)}
+.tabitem.active.t{color:var(--warn);border-color:rgba(255,184,0,.3)}
+.tabitem.active.s{color:var(--accent2);border-color:rgba(0,229,176,.3)}
+.tabitem.active.r{color:var(--danger);border-color:rgba(255,69,96,.3)}
+.stitle{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:11px;font-family:var(--fm)}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:14px}
+.ctitle{font-size:13px;font-weight:700;margin-bottom:12px;color:var(--text)}
+input[type=text],textarea{width:100%;background:var(--code-bg);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:9px 12px;font-size:13px;font-family:var(--fu);outline:none;transition:.15s}
+input[type=text]:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--ag)}
+textarea{resize:vertical;min-height:48px}
+/* teacher blocks */
+.blist{display:flex;flex-direction:column;gap:7px;margin-bottom:11px}
+.bitem{background:var(--code-bg);border:1px solid var(--border2);border-radius:10px;padding:10px 11px;display:grid;grid-template-columns:26px 1fr 200px 28px;gap:8px;align-items:start}
+.bnum{font-size:10px;color:var(--muted);font-family:var(--fm);padding-top:7px;text-align:center}
+.bitem textarea{background:transparent;border:none;outline:none;padding:0;min-height:34px;font-family:var(--fm);font-size:12.5px;box-shadow:none;color:var(--text)}
+.nick-inp{background:rgba(61,127,255,.06)!important;border:1px solid rgba(61,127,255,.2)!important;border-radius:7px;font-size:12px;color:#9eb0ff;padding:7px 10px!important;font-family:var(--fu)!important;font-weight:600;min-height:unset!important}
+.nick-inp::placeholder{color:rgba(158,176,255,.3)}
+.nick-inp:focus{border-color:var(--accent)!important;box-shadow:0 0 0 2px var(--ag)!important}
+.dbtn{background:transparent;border:none;color:var(--muted2);cursor:pointer;font-size:14px;padding:4px;border-radius:5px;transition:.15s;margin-top:4px}
+.dbtn:hover{background:rgba(255,69,96,.15);color:var(--danger)}
+.abtn{background:rgba(61,127,255,.06);border:1px dashed rgba(61,127,255,.35);color:var(--accent);padding:9px;border-radius:10px;cursor:pointer;font-size:13px;font-weight:700;width:100%;text-align:center;transition:.15s;font-family:var(--fu)}
+.abtn:hover{background:rgba(61,127,255,.12);border-style:solid}
+.genbtn{width:100%;background:var(--accent);border:none;color:#fff;padding:12px;border-radius:11px;cursor:pointer;font-size:14px;font-weight:700;transition:.15s;font-family:var(--fu);box-shadow:0 4px 20px rgba(61,127,255,.35)}
+.genbtn:hover{background:#5590ff;box-shadow:0 4px 28px rgba(61,127,255,.5)}
+.hint-box{background:rgba(255,184,0,.06);border:1px solid rgba(255,184,0,.2);border-radius:9px;padding:9px 13px;font-size:12px;color:var(--warn);margin-top:9px;line-height:1.6}
+.export-ok{background:rgba(0,229,176,.07);border:1px solid rgba(0,229,176,.25);border-radius:11px;padding:12px 16px;font-size:13px;color:var(--success);margin-top:10px;display:none;font-weight:700}
+/* ── multi-puzzle teacher ── */
+.puzzle-list-wrap{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+.puzzle-entry{background:var(--code-bg);border:1px solid var(--border2);border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:10px}
+.puzzle-entry .pe-num{font-size:10px;color:var(--muted);font-family:var(--fm);min-width:22px}
+.puzzle-entry .pe-title{font-size:13px;font-weight:700;color:var(--text);flex:1}
+.puzzle-entry .pe-meta{font-size:11px;color:var(--muted);font-family:var(--fm)}
+.pe-delbtn{background:transparent;border:none;color:var(--muted2);cursor:pointer;font-size:13px;padding:3px 7px;border-radius:5px;transition:.15s}
+.pe-delbtn:hover{color:var(--danger)}
+/* student */
+.name-row{display:flex;gap:8px;align-items:center;margin-bottom:14px}
+.name-row label{font-size:12px;font-weight:700;color:var(--muted);white-space:nowrap;font-family:var(--fm)}
+.qbox{background:linear-gradient(135deg,rgba(61,127,255,.08),rgba(0,229,176,.04));border:1px solid var(--border2);border-radius:14px;padding:16px 20px;margin-bottom:16px}
+.qtitle{font-size:16px;font-weight:700;color:var(--warn);margin-bottom:6px}
+.qdesc{font-size:13px;color:var(--text);line-height:1.65;opacity:.85}
+.qnav{display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
+.qnav-btn{background:var(--surface2);border:1px solid var(--border2);color:var(--muted);padding:6px 13px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:700;transition:.15s;font-family:var(--fu)}
+.qnav-btn:hover{border-color:var(--accent);color:var(--accent)}
+.qnav-btn.active-q{background:rgba(61,127,255,.12);border-color:var(--accent);color:var(--accent)}
+.qnav-btn.done-q{background:rgba(0,229,176,.08);border-color:rgba(0,229,176,.35);color:var(--accent2)}
+.qnav-btn.wrong-q{background:rgba(255,69,96,.08);border-color:rgba(255,69,96,.3);color:var(--danger)}
+.sgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+@media(max-width:680px){.sgrid{grid-template-columns:1fr}}
+.zone-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;font-family:var(--fm);display:flex;align-items:center;gap:7px}
+.zdot{width:7px;height:7px;border-radius:50%;display:inline-block;flex-shrink:0}
+.zdot.src{background:var(--warn)}.zdot.ans{background:var(--accent)}
+.dzone{min-height:190px;background:var(--surface);border:2px dashed var(--border2);border-radius:13px;padding:8px;transition:.2s}
+.dzone.over{border-color:var(--accent);background:rgba(61,127,255,.07);border-style:solid}
+.dzone.ans-z{border-color:rgba(0,229,176,.2)}
+.cblock{background:var(--code-bg);border:1px solid var(--border2);border-radius:10px;padding:9px 10px;margin-bottom:6px;cursor:grab;user-select:none;transition:.15s;display:flex;align-items:stretch;gap:8px}
+.cblock:active{cursor:grabbing}.cblock.dragging{opacity:.22;border-style:dashed;transform:scale(.97)}.cblock:hover{border-color:var(--accent);background:rgba(61,127,255,.04)}
+.grip{color:var(--muted2);font-size:10px;flex-shrink:0;display:flex;align-items:center;padding-right:3px;letter-spacing:-1px}
+.blk-disp{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.blk-nick{font-size:11px;font-weight:700;color:#9eb0ff;background:rgba(61,127,255,.12);border-radius:5px;padding:2px 8px;display:inline-block;width:fit-content}
+.blk-code{font-family:var(--fm);font-size:12px;white-space:pre;overflow-x:auto;color:#c8d4f8;line-height:1.55}
+.show-tog{font-size:10px;color:rgba(61,127,255,.5);cursor:pointer;margin-top:1px;font-family:var(--fm)}
+.show-tog:hover{color:var(--accent)}
 .ictl{display:flex;align-items:center;gap:3px;flex-shrink:0;align-self:center}
-.ibtn{background:var(--surface2);border:1px solid var(--border);color:var(--muted);width:19px;height:19px;border-radius:4px;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;transition:.1s;line-height:1}
+.ibtn{background:var(--surface2);border:1px solid var(--border2);color:var(--muted);width:20px;height:20px;border-radius:5px;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;transition:.1s;font-family:var(--fm)}
 .ibtn:hover{border-color:var(--accent);color:var(--accent)}
-.ilvl{font-size:10px;color:var(--muted);min-width:11px;text-align:center}
-
-/* ACTION */
-.arow{display:flex;gap:9px;margin-top:13px;flex-wrap:wrap;align-items:center}
-.runbtn{background:var(--accent);border:none;color:#fff;padding:9px 20px;border-radius:9px;cursor:pointer;font-size:14px;font-weight:700;transition:.15s;display:flex;align-items:center;gap:7px}
-.runbtn:hover{background:#6b79ff}
-.runbtn:disabled{opacity:.45;cursor:not-allowed}
-.chkbtn{background:var(--accent2);border:none;color:#0f1117;padding:9px 20px;border-radius:9px;cursor:pointer;font-size:14px;font-weight:700;transition:.15s}
+.ilvl{font-size:10px;color:var(--muted);min-width:12px;text-align:center;font-family:var(--fm)}
+.arow{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.runbtn{background:var(--accent);border:none;color:#fff;padding:10px 20px;border-radius:10px;cursor:pointer;font-size:13px;font-weight:700;transition:.15s;display:flex;align-items:center;gap:7px;font-family:var(--fu);box-shadow:0 3px 14px rgba(61,127,255,.35)}
+.runbtn:hover{background:#5590ff}.runbtn:disabled{opacity:.4;cursor:not-allowed;box-shadow:none}
+.chkbtn{background:var(--accent2);border:none;color:#07090f;padding:10px 20px;border-radius:10px;cursor:pointer;font-size:13px;font-weight:700;transition:.15s;font-family:var(--fu);box-shadow:0 3px 14px rgba(0,229,176,.22)}
 .chkbtn:hover{opacity:.85}
-.rstbtn{background:var(--surface2);border:1px solid var(--border);color:var(--muted);padding:9px 16px;border-radius:9px;cursor:pointer;font-size:14px;transition:.15s}
+.rstbtn{background:var(--surface2);border:1px solid var(--border2);color:var(--muted);padding:10px 16px;border-radius:10px;cursor:pointer;font-size:13px;transition:.15s;font-family:var(--fu);font-weight:600}
 .rstbtn:hover{border-color:var(--danger);color:var(--danger)}
-
-/* RESULT */
-.rbox{border-radius:10px;padding:11px 15px;margin-top:12px;font-size:14px;font-weight:600;display:none}
-.rbox.ok{background:rgba(74,240,184,.1);border:1px solid rgba(74,240,184,.35);color:var(--success);display:block}
-.rbox.ng{background:rgba(255,91,114,.09);border:1px solid rgba(255,91,114,.3);color:var(--danger);display:block}
-
-/* TERMINAL */
-.twrap{margin-top:18px}
-.thead2{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px}
-.ttitle{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;display:flex;align-items:center;gap:8px}
-.tdots{display:flex;gap:4px}
-.tdd{width:9px;height:9px;border-radius:50%}
-.tdd1{background:#ff5b72}.tdd2{background:#ffc46a}.tdd3{background:#4af0b8}
-.clrbtn{font-size:12px;color:var(--muted);background:none;border:none;cursor:pointer;padding:2px 7px;border-radius:5px;transition:.1s}
+.expbtn{background:rgba(255,184,0,.1);border:1px solid rgba(255,184,0,.3);color:var(--warn);padding:10px 16px;border-radius:10px;cursor:pointer;font-size:13px;transition:.15s;font-family:var(--fu);font-weight:700;margin-left:auto}
+.expbtn:hover{background:rgba(255,184,0,.2);border-color:var(--warn)}
+.rbox{border-radius:11px;padding:12px 16px;margin-top:4px;font-size:14px;font-weight:700;display:none}
+.rbox.ok{background:rgba(0,229,176,.09);border:1px solid rgba(0,229,176,.3);color:var(--success);display:block}
+.rbox.ng{background:rgba(255,69,96,.08);border:1px solid rgba(255,69,96,.25);color:var(--danger);display:block}
+.twrap{margin-top:16px}
+.term-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.ttitle{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;display:flex;align-items:center;gap:8px;font-family:var(--fm)}
+.tdots{display:flex;gap:5px;align-items:center}.tdd{width:9px;height:9px;border-radius:50%}
+.tdd1{background:#ff5f57}.tdd2{background:#febc2e}.tdd3{background:#28c840}
+.clrbtn{font-size:11px;color:var(--muted);background:none;border:none;cursor:pointer;padding:3px 8px;border-radius:5px;transition:.1s;font-family:var(--fm)}
 .clrbtn:hover{color:var(--danger)}
-.terminal{background:#080a12;border:1px solid var(--border);border-radius:11px;padding:13px 15px;font-family:'Consolas','Courier New',monospace;font-size:12.5px;min-height:120px;max-height:300px;overflow-y:auto;line-height:1.65;color:#c8d0f0}
-.lo{white-space:pre-wrap;word-break:break-all;color:#dde5ff}
+.terminal{background:#04060e;border:1px solid var(--border);border-radius:12px;padding:14px 16px;font-family:var(--fm);font-size:12.5px;min-height:110px;max-height:280px;overflow-y:auto;line-height:1.7}
+.lo{white-space:pre-wrap;word-break:break-all;color:#d0dbff}
 .le{color:var(--danger);white-space:pre-wrap;word-break:break-all}
 .li{color:var(--muted);font-style:italic}
 .lp{color:var(--accent2);white-space:pre-wrap}
-
-/* INPUT MODAL */
-.iover{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;display:flex;align-items:center;justify-content:center}
-.imodal{background:var(--surface);border:1px solid var(--border);border-radius:15px;padding:22px;width:370px;max-width:90vw}
-.imodal h3{font-size:14px;margin-bottom:6px}
-.imodal p{font-size:12px;color:var(--muted);margin-bottom:13px;line-height:1.5}
-.imodal input{margin-bottom:13px}
+/* review */
+.drop-zone{border:2px dashed var(--border2);border-radius:14px;padding:30px;text-align:center;cursor:pointer;transition:.2s;margin-bottom:14px}
+.drop-zone:hover,.drop-zone.dzon{border-color:var(--accent);background:rgba(61,127,255,.05)}
+.dz-icon{font-size:34px;margin-bottom:8px}
+.dz-title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px}
+.dz-sub{font-size:12px;color:var(--muted)}
+.import-list{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+.import-item{background:var(--code-bg);border:1px solid var(--border2);border-radius:9px;padding:9px 13px;display:flex;align-items:center;gap:10px}
+.iname{font-size:13px;font-weight:700;color:var(--text);flex:1}
+.imeta{font-size:11px;color:var(--muted);font-family:var(--fm)}
+.imp-rm{background:transparent;border:none;color:var(--muted2);cursor:pointer;font-size:13px;padding:2px 6px;border-radius:5px;transition:.15s}
+.imp-rm:hover{color:var(--danger)}
+.clear-btn{background:rgba(255,69,96,.08);border:1px solid rgba(255,69,96,.25);color:var(--danger);padding:8px 16px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:700;font-family:var(--fu);transition:.15s}
+.clear-btn:hover{background:rgba(255,69,96,.15)}
+.rgrid{display:grid;grid-template-columns:270px 1fr;gap:16px;min-height:420px}
+@media(max-width:820px){.rgrid{grid-template-columns:1fr}}
+.rsidebar{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px;overflow-y:auto;max-height:620px}
+.rsidebar-title{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;font-family:var(--fm)}
+.stu-item{padding:10px 12px;border-radius:9px;cursor:pointer;transition:.15s;margin-bottom:5px;border:1px solid transparent}
+.stu-item:hover{background:var(--surface2);border-color:var(--border2)}
+.stu-item.sel{background:rgba(61,127,255,.1);border-color:rgba(61,127,255,.3)}
+.sname{font-size:13px;font-weight:700;color:var(--text)}
+.smeta{font-size:11px;color:var(--muted);margin-top:2px;font-family:var(--fm)}
+.sbadge{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px;font-family:var(--fm);margin-top:4px}
+.sbadge.ok{background:rgba(0,229,176,.1);color:var(--success);border:1px solid rgba(0,229,176,.25)}
+.sbadge.ng{background:rgba(255,69,96,.1);color:var(--danger);border:1px solid rgba(255,69,96,.25)}
+.sbadge.part{background:rgba(255,184,0,.1);color:var(--warn);border:1px solid rgba(255,184,0,.25)}
+.sbadge.none{background:var(--surface2);color:var(--muted);border:1px solid var(--border2)}
+.rmain{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;overflow-y:auto;max-height:620px}
+.rempty{display:flex;align-items:center;justify-content:center;height:280px;color:var(--muted);font-size:14px;flex-direction:column;gap:8px}
+/* AI review box */
+.ai-box{border-radius:13px;padding:16px;margin-bottom:14px;border:1px solid}
+.ai-box.loading{background:rgba(61,127,255,.05);border-color:rgba(61,127,255,.2)}
+.ai-box.done{background:rgba(0,229,176,.05);border-color:rgba(0,229,176,.2)}
+.ai-box.err{background:rgba(255,69,96,.05);border-color:rgba(255,69,96,.2)}
+.ai-title{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;font-family:var(--fm);display:flex;align-items:center;gap:8px}
+.ai-score{font-size:28px;font-weight:800;color:var(--accent2);margin-bottom:6px}
+.ai-comment{font-size:13px;line-height:1.7;color:var(--text);white-space:pre-wrap}
+.ai-thinking{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+.ai-spinner{width:14px;height:14px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+.review-order{background:var(--code-bg);border:1px solid var(--border2);border-radius:10px;padding:14px;margin-bottom:14px}
+.ro-title{font-size:11px;color:var(--muted);font-family:var(--fm);margin-bottom:8px}
+.order-blocks{display:flex;flex-direction:column;gap:5px}
+.order-blk{padding:7px 11px;border-radius:7px;font-size:12px;font-family:var(--fm);display:flex;align-items:center;gap:10px}
+.order-blk.correct{background:rgba(0,229,176,.07);border:1px solid rgba(0,229,176,.2)}
+.order-blk.wrong{background:rgba(255,69,96,.07);border:1px solid rgba(255,69,96,.2)}
+.order-num{font-size:10px;color:var(--muted);min-width:22px}
+.order-code{color:var(--text);flex:1;white-space:pre;overflow-x:auto}
+.order-mark{font-size:12px;margin-left:auto}
+.rterm{background:#04060e;border:1px solid var(--border);border-radius:11px;padding:12px 14px;font-family:var(--fm);font-size:12px;min-height:70px;max-height:200px;overflow-y:auto;line-height:1.65;color:#c8d4f8;white-space:pre-wrap}
+/* puzzle tabs for review */
+.ptab-row{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px}
+.ptab{background:var(--surface2);border:1px solid var(--border2);color:var(--muted);padding:5px 12px;border-radius:7px;cursor:pointer;font-size:12px;font-weight:700;transition:.15s;font-family:var(--fu)}
+.ptab:hover{border-color:var(--accent);color:var(--accent)}
+.ptab.ap{background:rgba(61,127,255,.12);border-color:var(--accent);color:var(--accent)}
+/* input modal */
+.iover{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:200;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.imodal{background:var(--surface);border:1px solid var(--border2);border-radius:16px;padding:24px;width:380px;max-width:92vw;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.imodal h3{font-size:14px;font-weight:700;margin-bottom:6px}
+.imodal p{font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.5}
+.imodal input{margin-bottom:14px}
 .mbtns{display:flex;gap:9px;justify-content:flex-end}
-.mok{background:var(--accent);border:none;color:#fff;padding:7px 18px;border-radius:7px;cursor:pointer;font-size:13px;font-weight:700}
-.mcx{background:var(--surface2);border:1px solid var(--border);color:var(--muted);padding:7px 14px;border-radius:7px;cursor:pointer;font-size:13px}
+.mok{background:var(--accent);border:none;color:#fff;padding:8px 20px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:700;font-family:var(--fu)}
+.mcx{background:var(--surface2);border:1px solid var(--border2);color:var(--muted);padding:8px 15px;border-radius:8px;cursor:pointer;font-size:13px;font-family:var(--fu)}
+::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
 </style>
 </head>
 <body>
-
 <header>
-  <div class="logo">Py<span>Puzzle</span></div>
+  <div class="logo"><span class="py">Py</span><span class="puz">Puzzle</span><span style="color:var(--muted);font-size:12px;margin-left:4px">v3</span></div>
   <span class="badge t" id="badge">โหมดครู</span>
   <div class="hs"></div>
   <div class="py-status">
     <span class="pydot loading" id="pydot"></span>
     <span id="pytext">กำลังโหลด Python…</span>
   </div>
-  <button class="hbtn" onclick="switchMode()">🔄 สลับโหมด</button>
 </header>
 
 <div class="app">
+<div class="tabnav">
+  <div class="tabitem active t" id="tab-t" onclick="switchTab('teacher')">⚙️ ออกข้อสอบ</div>
+  <div class="tabitem s" id="tab-s" onclick="switchTab('student')">🎮 ทำข้อสอบ</div>
+  <div class="tabitem r" id="tab-r" onclick="switchTab('review')">🤖 ตรวจงาน AI</div>
+</div>
 
 <!-- ══ TEACHER ══ -->
 <div id="tp">
-  <div class="ptitle">⚙️ ตั้งค่าโจทย์ — โหมดครู</div>
+  <div class="stitle">⚙️ ออกข้อสอบ — สร้างได้หลายข้อ</div>
 
+  <!-- Puzzle list -->
   <div class="card">
-    <h3>📋 ชื่อโจทย์ / คำถาม</h3>
-    <input type="text" id="ptitle-in" placeholder="เช่น จงเรียงโค้ดให้พิมพ์ผลรวม 1–10" style="margin-bottom:8px">
-    <textarea id="pdesc-in" placeholder="คำอธิบายเพิ่มเติม (ถ้ามี)…" rows="2"></textarea>
-  </div>
-
-  <div class="card">
-    <h3>🧩 บล็อกโค้ด Python
-      <span style="font-size:11px;font-weight:400;color:var(--muted);margin-left:6px">
-        — ตั้งชื่อเล่นให้แต่ละบล็อกเพื่อซ่อนโค้ดจากนักเรียน (ไม่บังคับ)
-      </span>
-    </h3>
-
-    <div style="display:grid;grid-template-columns:auto 1fr 1fr auto;gap:8px;padding:0 0 7px 30px;font-size:11px;color:var(--muted);font-weight:600">
-      <span>โค้ด Python</span>
-      <span>ชื่อเล่น (แสดงให้นักเรียนเห็น)</span>
+    <div class="ctitle">📚 รายการโจทย์ทั้งหมด
+      <span style="font-size:11px;font-weight:400;color:var(--muted);margin-left:6px">— นักเรียนจะได้รับทุกข้อในไฟล์เดียวกัน และลำดับข้อจะสลับอัตโนมัติ</span>
     </div>
-
-    <div class="blist" id="blist"></div>
-    <button class="abtn" onclick="addBlock()">＋ เพิ่มบล็อกโค้ด</button>
-
-    <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
-      <div class="ptitle" style="margin-bottom:6px">ลำดับคำตอบที่ถูกต้อง</div>
-      <input type="text" id="ans-order" placeholder="เช่น 1,2,3,4 (หมายเลขบล็อกตามลำดับที่ถูก)">
-      <div class="hint">💡 ระบุหมายเลขบล็อกคั่นด้วย comma • หมายเลขปรากฏทางซ้ายของแต่ละบล็อก</div>
+    <div class="puzzle-list-wrap" id="puzzle-list-wrap">
+      <div style="font-size:12px;color:var(--muted);padding:8px">ยังไม่มีโจทย์ — กดปุ่มด้านล่างเพื่อเพิ่ม</div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="abtn" style="flex:1" onclick="openAddPuzzle()">＋ เพิ่มโจทย์ใหม่</button>
     </div>
   </div>
 
-  <button class="genbtn" onclick="generatePuzzle()">🎯 สร้างโจทย์สำหรับนักเรียน</button>
-  <div id="export-area"></div>
-  <button class="copybtn" id="copybtn" onclick="copyPuzzle()" style="display:none">📋 คัดลอก Code แจกนักเรียน</button>
+  <button class="genbtn" onclick="generateAll()">🎯 Export HTML แจกนักเรียน (ทุกข้อ)</button>
+  <div class="export-ok" id="exp-ok">✅ Export สำเร็จ! ดาวน์โหลดแล้ว — แจกนักเรียนได้เลย</div>
+
+  <!-- Add/Edit puzzle modal inline -->
+  <div id="edit-panel" style="display:none;margin-top:14px">
+    <div class="card" style="border-color:rgba(61,127,255,.3)">
+      <div class="ctitle" id="edit-panel-title">➕ เพิ่มโจทย์</div>
+      <input type="text" id="ep-title" placeholder="ชื่อโจทย์ เช่น ข้อ 1: รับค่า input" style="margin-bottom:9px">
+      <textarea id="ep-desc" placeholder="คำอธิบาย (ถ้ามี)…" rows="2" style="margin-bottom:12px"></textarea>
+
+      <div style="display:grid;grid-template-columns:26px 1fr 200px 28px;gap:8px;padding:0 0 8px;font-size:10px;color:var(--muted);font-weight:700;letter-spacing:.5px;font-family:var(--fm)">
+        <span></span><span>โค้ด Python</span><span>ชื่อเล่น (ซ่อนจากนักเรียน)</span><span></span>
+      </div>
+      <div class="blist" id="ep-blist"></div>
+      <button class="abtn" onclick="epAddBlock()" style="margin-bottom:14px">＋ เพิ่มบล็อก</button>
+
+      <div style="padding-top:12px;border-top:1px solid var(--border)">
+        <div class="stitle" style="margin-bottom:7px">ลำดับคำตอบที่ถูกต้อง</div>
+        <input type="text" id="ep-order" placeholder="เช่น 1,2,3,4">
+        <div class="hint-box">💡 ระบุหมายเลขบล็อกคั่นด้วย comma — ตรงกับหมายเลขซ้ายมือของแต่ละบล็อก</div>
+      </div>
+
+      <div style="padding-top:12px;margin-top:10px;border-top:1px solid var(--border)">
+        <div class="stitle" style="margin-bottom:7px">🎯 คะแนนข้อนี้</div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <input type="number" id="ep-score" min="1" max="100" value="10" style="width:90px">
+          <span style="font-size:12px;color:var(--muted)">คะแนน</span>
+        </div>
+        <div class="hint-box" style="margin-top:8px">💡 นักเรียนจะได้คะแนนเต็มข้อนี้เมื่อ <strong>รันโค้ดสำเร็จ</strong> (ไม่ error) — และได้คะแนนพิเศษเพิ่มเมื่อ <strong>เรียงลำดับถูกต้องด้วย</strong></div>
+      </div>
+
+      <div style="display:flex;gap:8px;margin-top:14px">
+        <button class="genbtn" onclick="saveEditPuzzle()" style="flex:1">💾 บันทึกโจทย์</button>
+        <button class="rstbtn" onclick="cancelEdit()" style="padding:10px 18px">ยกเลิก</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- ══ STUDENT ══ -->
 <div id="sp">
-  <button class="rstbtn" onclick="tryLoad()" style="margin-bottom:13px">📥 โหลดโจทย์จากครู</button>
+  <div class="name-row">
+    <label>👤 ชื่อนักเรียน:</label>
+    <input type="text" id="student-name" placeholder="กรอกชื่อ-นามสกุล" style="max-width:260px">
+  </div>
+
+  <!-- Question navigator -->
+  <div id="qnav-row" class="qnav" style="display:none"></div>
 
   <div class="qbox">
-    <h2 id="qtitle">กรุณาตั้งค่าโจทย์ในโหมดครูก่อน</h2>
-    <p id="qdesc"></p>
+    <div class="qtitle" id="qtitle">กรุณาโหลดไฟล์โจทย์จากครูก่อน</div>
+    <div class="qdesc" id="qdesc"></div>
   </div>
 
   <div class="sgrid">
     <div>
-      <div class="zlabel"><span class="dot do"></span>บล็อกโค้ดทั้งหมด (ลาก)</div>
-      <div class="dzone" id="src-zone"
-        ondragover="dOver(event)" ondrop="dDrop(event,'src')" ondragleave="dLeave(event)"></div>
+      <div class="zone-label"><span class="zdot src"></span>บล็อกโค้ด (ลากออกไป)</div>
+      <div class="dzone" id="src-zone" ondragover="dOver(event)" ondrop="dDrop(event,'src')" ondragleave="dLeave(event)"></div>
     </div>
     <div>
-      <div class="zlabel"><span class="dot db"></span>พื้นที่เรียงโค้ด (วางที่นี่)</div>
-      <div class="dzone az" id="ans-zone"
-        ondragover="dOver(event)" ondrop="dDrop(event,'ans')" ondragleave="dLeave(event)"></div>
+      <div class="zone-label"><span class="zdot ans"></span>เรียงคำตอบที่นี่</div>
+      <div class="dzone ans-z" id="ans-zone" ondragover="dOver(event)" ondrop="dDrop(event,'ans')" ondragleave="dLeave(event)"></div>
     </div>
   </div>
 
@@ -215,29 +296,51 @@ textarea{resize:vertical;min-height:54px}
     <button class="runbtn" id="runbtn" onclick="runCode()" disabled>
       <span id="run-icon">▶</span><span id="run-lbl">รันโค้ด</span>
     </button>
-    <button class="chkbtn" onclick="checkAns()">✅ ตรวจคำตอบ</button>
-    <button class="rstbtn" onclick="resetStudent()">↺ รีเซ็ต</button>
+    <button class="chkbtn" onclick="checkAns()">✅ ตรวจคำตอบข้อนี้</button>
+    <button class="rstbtn" onclick="resetQ()">↺ รีเซ็ตข้อนี้</button>
+    <button class="expbtn" onclick="exportWork()">📤 ส่งงานทั้งหมด</button>
   </div>
-
   <div class="rbox" id="rbox"></div>
 
   <div class="twrap">
-    <div class="thead2">
-      <div class="ttitle">
-        <div class="tdots">
-          <div class="tdd tdd1"></div><div class="tdd tdd2"></div><div class="tdd tdd3"></div>
-        </div>
-        Terminal — Python Output
-      </div>
-      <button class="clrbtn" onclick="clearTerm()">ล้างหน้าจอ</button>
+    <div class="term-hdr">
+      <div class="ttitle"><div class="tdots"><div class="tdd tdd1"></div><div class="tdd tdd2"></div><div class="tdd tdd3"></div></div>Terminal</div>
+      <button class="clrbtn" onclick="clearTerm()">ล้าง</button>
     </div>
-    <div class="terminal" id="term">
-      <div class="li">>>> กำลังโหลด Python (Pyodide) — รอสักครู่…</div>
-    </div>
+    <div class="terminal" id="term"><div class="li">>>> กำลังโหลด Python…</div></div>
   </div>
 </div>
 
-</div><!-- /app -->
+<!-- ══ REVIEW ══ -->
+<div id="rp">
+  <div class="stitle">🤖 ตรวจงาน AI — โยนไฟล์แล้วตรวจอัตโนมัติ</div>
+
+  <div class="card">
+    <div class="ctitle">📥 นำเข้าไฟล์งานนักเรียน</div>
+    <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-inp').click()"
+      ondragover="dzOver(event)" ondragleave="dzLeave(event)" ondrop="dzDrop(event)">
+      <div class="dz-icon">📂</div>
+      <div class="dz-title">คลิกหรือลากไฟล์ HTML มาวางตรงนี้</div>
+      <div class="dz-sub">รองรับหลายไฟล์พร้อมกัน — ตรวจอัตโนมัติทันที</div>
+    </div>
+    <input type="file" id="file-inp" accept=".html" multiple style="display:none" onchange="importFiles(event)">
+    <div class="import-list" id="import-list"></div>
+    <div style="display:flex;justify-content:flex-end;gap:8px" id="clear-wrap">
+      <button class="clear-btn" onclick="clearAll()">🗑 ล้างทั้งหมด</button>
+    </div>
+  </div>
+
+  <div class="rgrid">
+    <div class="rsidebar">
+      <div class="rsidebar-title">รายชื่อนักเรียน</div>
+      <div id="stu-list"><div style="font-size:12px;color:var(--muted)">ยังไม่มีข้อมูล</div></div>
+    </div>
+    <div class="rmain" id="rmain">
+      <div class="rempty"><div style="font-size:32px">👈</div><div>เลือกนักเรียนเพื่อดูรายละเอียด</div></div>
+    </div>
+  </div>
+</div>
+</div>
 
 <!-- INPUT MODAL -->
 <div class="iover" id="iover" style="display:none">
@@ -253,20 +356,29 @@ textarea{resize:vertical;min-height:54px}
 </div>
 
 <script>
-/* ── STATE ── */
-let mode = 'teacher', puzzleData = null, dragEl = null;
-let blocks = [];   // { code, nick }
+/* ══════════════════════ STATE ══════════════════════ */
 let pyodide = null, inputCb = null;
+let dragEl = null;
+let puzzleBank = [];      // teacher: [{title,desc,blocks,nicks,answerOrder}]
+let editingIdx = null;    // which puzzle being edited (-1 = new)
+let epBlocks = [];        // blocks in edit panel
 
-/* ══════════════════════════════════════
-   PYODIDE — fixed print via stdout patch
-══════════════════════════════════════ */
+// student state
+let allPuzzles = [];      // loaded from file (shuffled order)
+let currentQIdx = 0;      // which question shown
+let qStates = [];         // [{answerZone:[...blockEls], srcZone:[...blockEls], checkResult, runOutput, didRun}]
+let lastRunOutput = '';
+
+// review
+let studentAnswers = [];
+let selStuIdx = null;
+
+/* ══════════════════════ PYODIDE ══════════════════════ */
 async function initPy() {
   try {
     pyodide = await loadPyodide();
-
-    /* patch stdout/stderr ONCE after load */
-    pyodide.runPython(`
+    // patch stdout/stderr
+    await pyodide.runPythonAsync(`
 import sys, io
 
 class _JSWriter(io.RawIOBase):
@@ -287,42 +399,41 @@ class _JSWriter(io.RawIOBase):
 sys.stdout = io.TextIOWrapper(io.BufferedWriter(_JSWriter('out')), line_buffering=True)
 sys.stderr = io.TextIOWrapper(io.BufferedWriter(_JSWriter('err')), line_buffering=True)
 `);
-
     document.getElementById('pydot').className = 'pydot ok';
     document.getElementById('pytext').textContent = 'Python 3 พร้อม';
-    const b = document.getElementById('runbtn');
-    if (b) b.disabled = false;
-    termLine('i', '>>> Python 3 พร้อมใช้งานแล้ว — เรียงโค้ดแล้วกด ▶ รันโค้ด');
+    document.getElementById('runbtn').disabled = false;
+    termLine('i','>>> Python 3 พร้อมแล้ว — เรียงโค้ดแล้วกด ▶ รัน');
   } catch(e) {
-    document.getElementById('pydot').style.background = 'var(--danger)';
-    document.getElementById('pytext').textContent = 'โหลดไม่สำเร็จ';
-    termLine('e', '>>> ไม่สามารถโหลด Python ได้ กรุณาตรวจสอบอินเทอร์เน็ต');
+    document.getElementById('pydot').style.background='var(--danger)';
+    document.getElementById('pytext').textContent='โหลดไม่สำเร็จ';
+    termLine('e','โหลด Python ไม่สำเร็จ กรุณาตรวจสอบอินเทอร์เน็ต');
   }
 }
 initPy();
 
-/* ── TERMINAL ── */
-function termLine(type, text) {
-  const t = document.getElementById('term'); if (!t) return;
+/* ══════════════════════ TERMINAL ══════════════════════ */
+function termLine(t, text) {
+  const el = document.getElementById('term'); if (!el) return;
   const d = document.createElement('div');
-  d.className = type==='e'?'le': type==='i'?'li': type==='p'?'lp': 'lo';
+  d.className = t==='e'?'le': t==='i'?'li': t==='p'?'lp':'lo';
   d.textContent = text;
-  t.appendChild(d); t.scrollTop = t.scrollHeight;
+  el.appendChild(d); el.scrollTop = el.scrollHeight;
+  if (t==='o') lastRunOutput += text + '\n';
+  if (t==='e') lastRunOutput += '[ERROR] ' + text + '\n';
 }
-/* called from Python via js.termWrite */
 window.termWrite = function(kind, text) {
   if (!text) return;
-  /* split on newlines so each line is a separate div */
-  const lines = text.split('\n');
-  lines.forEach((ln, idx) => {
-    /* skip trailing empty from final \n */
-    if (idx === lines.length - 1 && ln === '') return;
-    termLine(kind === 'err' ? 'e' : 'o', ln);
+  text.split('\n').forEach((ln, i, a) => {
+    if (i === a.length-1 && ln === '') return;
+    termLine(kind==='err' ? 'e' : 'o', ln);
   });
 };
-function clearTerm() { const t=document.getElementById('term'); if(t) t.innerHTML=''; }
+function clearTerm() {
+  const t = document.getElementById('term'); if (t) t.innerHTML = '';
+  lastRunOutput = '';
+}
 
-/* ── INPUT MODAL ── */
+/* ══════════════════════ INPUT MODAL ══════════════════════ */
 window.jsInput = function(prompt) {
   return new Promise(resolve => {
     inputCb = resolve;
@@ -343,21 +454,19 @@ function cancelInput() {
   if (inputCb) { inputCb(''); inputCb = null; }
 }
 
-/* ══════════════════════════════════════
-   RUN CODE — correct Pyodide approach
-══════════════════════════════════════ */
+/* ══════════════════════ RUN CODE (fixed input) ══════════════════════ */
 async function runCode() {
-  if (!pyodide) { termLine('e','>>> Python ยังโหลดไม่เสร็จ'); return; }
+  if (!pyodide) { termLine('e','Python ยังโหลดไม่เสร็จ'); return; }
   const zone = document.getElementById('ans-zone');
-  const cblocks = [...zone.querySelectorAll('.cblock')];
-  if (!cblocks.length) { termLine('e','>>> ยังไม่มีโค้ด กรุณาลากบล็อกมาเรียงก่อน'); return; }
+  const cbs = [...zone.querySelectorAll('.cblock')];
+  if (!cbs.length) { termLine('e','ยังไม่มีโค้ด กรุณาลากบล็อกมาเรียงก่อน'); return; }
 
-  const codeLines = cblocks.map(b => b.dataset.rawcode || b.querySelector('.block-code-text').textContent);
-  const fullCode = codeLines.join('\n');
+  const lines = cbs.map(b => b.dataset.rawcode || b.querySelector('.blk-code').textContent);
+  const code = lines.join('\n');
 
   clearTerm();
   termLine('i','--- โค้ดที่รัน ---');
-  codeLines.forEach(l => termLine('p', l));
+  lines.forEach(l => termLine('p', l));
   termLine('i','--- ผลลัพธ์ ---');
 
   const btn = document.getElementById('runbtn');
@@ -366,34 +475,41 @@ async function runCode() {
   document.getElementById('run-lbl').textContent = 'กำลังรัน…';
 
   try {
-    /* inject async input override each run */
+    // Patch input() to use our async modal — must inject fresh each run
     await pyodide.runPythonAsync(`
-import builtins, js
+import builtins, js, sys
 
-async def _input(prompt=''):
+async def _async_input(prompt=''):
+    sys.stdout.flush()
     result = await js.jsInput(str(prompt))
     return str(result)
 
-builtins.input = _input
+builtins.input = _async_input
 `);
 
-    /* run user code — wrap in async function to support await input() */
-    const wrapped = `
-import asyncio
-
-async def __main__():
-${fullCode.split('\n').map(l => '    ' + l).join('\n')}
-
-await __main__()
-`;
+    // Wrap entire user code in async so await input() works at top level
+    const indented = code.split('\n').map(l => '    ' + l).join('\n');
+    const wrapped = `import asyncio\nasync def __user_main__():\n${indented}\nawait __user_main__()`;
     await pyodide.runPythonAsync(wrapped);
     termLine('i','--- จบการทำงาน ✓ ---');
 
+    // Save run output to current q state
+    if (qStates[currentQIdx]) {
+      qStates[currentQIdx].runOutput = lastRunOutput;
+      qStates[currentQIdx].didRun = true;
+      // ✅ ได้คะแนนทันทีที่รันสำเร็จ
+      if (!qStates[currentQIdx].runScored) {
+        qStates[currentQIdx].runScored = true;
+        const p = allPuzzles[currentQIdx];
+        const ms = p.maxScore || 10;
+        termLine('i', `🎯 รันสำเร็จ! ได้รับ ${ms} คะแนน`);
+      }
+    }
+    renderQNav();
   } catch(err) {
     let msg = String(err.message || err);
-    /* strip pyodide internal frames */
     const clean = msg.split('\n')
-      .filter(l => !l.includes('pyodide') && !l.includes('__main__') && !l.trim().startsWith('await '))
+      .filter(l => !l.includes('pyodide') && !l.includes('__user_main__') && !l.trim().startsWith('await '))
       .join('\n').trim();
     termLine('e', '❌ ' + (clean || msg));
   }
@@ -403,204 +519,910 @@ await __main__()
   document.getElementById('run-lbl').textContent = 'รันโค้ด';
 }
 
-/* ── MODE SWITCH ── */
-function switchMode() {
-  if (mode === 'teacher') {
-    mode = 'student';
-    document.getElementById('tp').style.display = 'none';
-    document.getElementById('sp').style.display = 'block';
-    document.getElementById('badge').textContent = 'โหมดนักเรียน';
-    document.getElementById('badge').className = 'badge s';
-    if (puzzleData) loadPuzzle(puzzleData);
-    if (pyodide) document.getElementById('runbtn').disabled = false;
-  } else {
-    mode = 'teacher';
-    document.getElementById('tp').style.display = 'block';
-    document.getElementById('sp').style.display = 'none';
-    document.getElementById('badge').textContent = 'โหมดครู';
-    document.getElementById('badge').className = 'badge t';
-  }
+/* ══════════════════════ TAB ══════════════════════ */
+function switchTab(tab) {
+  ['teacher','student','review'].forEach(t => {
+    document.getElementById(t==='teacher'?'tp':t==='student'?'sp':'rp').style.display = 'none';
+  });
+  document.getElementById(tab==='teacher'?'tp':tab==='student'?'sp':'rp').style.display = 'block';
+  document.getElementById('badge').textContent = tab==='teacher'?'โหมดครู':tab==='student'?'โหมดนักเรียน':'โหมดตรวจงาน';
+  document.getElementById('badge').className = 'badge '+(tab==='teacher'?'t':tab==='student'?'s':'r');
+  document.querySelectorAll('.tabitem').forEach(el=>el.classList.remove('active'));
+  document.getElementById('tab-'+tab[0]).classList.add('active');
+  if (pyodide) document.getElementById('runbtn').disabled = false;
 }
 
-/* ══════════════════════════════════════
-   TEACHER
-══════════════════════════════════════ */
-function addBlock(code='', nick='') {
-  const idx = blocks.length;
-  blocks.push({ code, nick });
-  const list = document.getElementById('blist');
-  const d = document.createElement('div');
-  d.className = 'bitem'; d.dataset.idx = idx;
-  d.innerHTML = `
-    <span class="bnum" style="padding-top:6px">#${idx+1}</span>
-    <textarea class="mono" rows="2" placeholder="โค้ด Python…"
-      oninput="blocks[${idx}].code=this.value">${esc(code)}</textarea>
-    <input type="text" class="nick-input" placeholder='ชื่อเล่น เช่น "เริ่มต้นผลรวม" (ไม่บังคับ)'
-      value="${esc(nick)}" oninput="blocks[${idx}].nick=this.value">
-    <button class="dbtn" onclick="removeBlock(${idx},this.parentElement)" title="ลบ">✕</button>`;
+/* ══════════════════════ TEACHER — PUZZLE BANK ══════════════════════ */
+function openAddPuzzle() {
+  editingIdx = -1; epBlocks = [];
+  document.getElementById('ep-title').value = '';
+  document.getElementById('ep-desc').value = '';
+  document.getElementById('ep-order').value = '';
+  document.getElementById('ep-blist').innerHTML = '';
+  document.getElementById('edit-panel-title').textContent = '➕ เพิ่มโจทย์ใหม่';
+  document.getElementById('edit-panel').style.display = 'block';
+  document.getElementById('edit-panel').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function openEditPuzzle(i) {
+  editingIdx = i;
+  const p = puzzleBank[i];
+  epBlocks = p.blocks.map((code, j) => ({ code, nick: (p.nicks||[])[j]||'' }));
+  document.getElementById('ep-title').value = p.title;
+  document.getElementById('ep-desc').value = p.desc||'';
+  document.getElementById('ep-order').value = (p.answerOrder||[]).map(x=>x+1).join(',');
+  document.getElementById('ep-score').value = p.maxScore || 10;
+  document.getElementById('ep-blist').innerHTML = '';
+  epBlocks.forEach((_, j) => epRenderBlock(j));
+  document.getElementById('edit-panel-title').textContent = '✏️ แก้ไขโจทย์';
+  document.getElementById('edit-panel').style.display = 'block';
+  document.getElementById('edit-panel').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function cancelEdit() { document.getElementById('edit-panel').style.display = 'none'; }
+function epAddBlock(code='', nick='') {
+  epBlocks.push({ code, nick });
+  epRenderBlock(epBlocks.length - 1);
+}
+function epRenderBlock(j) {
+  const list = document.getElementById('ep-blist');
+  const d = document.createElement('div'); d.className = 'bitem'; d.dataset.j = j;
+  d.innerHTML = `<span class="bnum" style="font-family:var(--fm)">#${j+1}</span>
+    <textarea class="mono" rows="2" placeholder="โค้ด Python…" style="font-family:var(--fm);font-size:12.5px"
+      oninput="epBlocks[${j}].code=this.value">${esc(epBlocks[j].code)}</textarea>
+    <input type="text" class="nick-inp" placeholder='ชื่อเล่น เช่น "รับค่า"'
+      value="${esc(epBlocks[j].nick)}" oninput="epBlocks[${j}].nick=this.value">
+    <button class="dbtn" onclick="epRemoveBlock(${j},this.closest('.bitem'))" title="ลบ">✕</button>`;
   list.appendChild(d);
 }
+function epRemoveBlock(j, el) { epBlocks.splice(j,1); el.remove(); epRebuild(); }
+function epRebuild() {
+  document.getElementById('ep-blist').innerHTML = '';
+  epBlocks.forEach((_,j) => epRenderBlock(j));
+}
+function saveEditPuzzle() {
+  const title = document.getElementById('ep-title').value.trim();
+  if (!title) { alert('กรุณาใส่ชื่อโจทย์'); return; }
+  if (epBlocks.length < 2) { alert('กรุณาเพิ่มบล็อกอย่างน้อย 2 บล็อก'); return; }
+  const orderStr = document.getElementById('ep-order').value;
+  const answerOrder = orderStr.split(',').map(s=>parseInt(s.trim())-1).filter(n=>!isNaN(n));
+  if (!answerOrder.length) { alert('กรุณาระบุลำดับคำตอบ'); return; }
+  const puzzle = {
+    title,
+    desc: document.getElementById('ep-desc').value.trim(),
+    blocks: epBlocks.map(b=>b.code),
+    nicks: epBlocks.map(b=>b.nick),
+    answerOrder,
+    maxScore: parseInt(document.getElementById('ep-score').value) || 10,
+  };
+  if (editingIdx === -1) puzzleBank.push(puzzle);
+  else puzzleBank[editingIdx] = puzzle;
+  document.getElementById('edit-panel').style.display = 'none';
+  renderPuzzleList();
+}
+function renderPuzzleList() {
+  const wrap = document.getElementById('puzzle-list-wrap');
+  if (!puzzleBank.length) {
+    wrap.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:8px">ยังไม่มีโจทย์</div>';
+    return;
+  }
+  wrap.innerHTML = '';
+  puzzleBank.forEach((p, i) => {
+    const d = document.createElement('div'); d.className = 'puzzle-entry';
+    d.innerHTML = `<span class="pe-num">#${i+1}</span>
+      <span class="pe-title">${esc(p.title)}</span>
+      <span class="pe-meta">${p.blocks.length} บล็อก | <span style="color:var(--warn);font-weight:700">${p.maxScore||10} คะแนน</span></span>
+      <button class="qnav-btn" style="font-size:11px;padding:5px 10px" onclick="openEditPuzzle(${i})">✏️ แก้ไข</button>
+      <button class="pe-delbtn" onclick="deletePuzzle(${i})">✕</button>`;
+    wrap.appendChild(d);
+  });
+}
+function deletePuzzle(i) {
+  if (!confirm(`ลบโจทย์ "${puzzleBank[i].title}"?`)) return;
+  puzzleBank.splice(i, 1); renderPuzzleList();
+}
 
-function removeBlock(idx, el) { blocks.splice(idx,1); el.remove(); rebuildNums(); }
-function rebuildNums() {
-  document.querySelectorAll('.bitem').forEach((el,i)=>{
-    el.querySelector('.bnum').textContent='#'+(i+1);
-    el.dataset.idx=i;
+/* ══════════════════════ TEACHER — GENERATE HTML ══════════════════════ */
+function generateAll() {
+  if (!puzzleBank.length) { alert('กรุณาเพิ่มโจทย์อย่างน้อย 1 ข้อก่อน'); return; }
+  const encoded = btoa(unescape(encodeURIComponent(JSON.stringify({ puzzles: puzzleBank }))));
+  const html = buildStudentHTML(encoded);
+  const fname = 'PyPuzzle_' + (puzzleBank[0].title.replace(/[^a-zA-Zก-๙0-9]/g,'_').slice(0,25)||'exam') + '.html';
+  downloadHTML(html, fname);
+  document.getElementById('exp-ok').style.display = 'block';
+  setTimeout(() => document.getElementById('exp-ok').style.display='none', 4000);
+}
+
+/* ══════════════════════ STUDENT — LOAD PUZZLES ══════════════════════ */
+function loadAllPuzzles(data) {
+  // data.puzzles = array of puzzles; shuffle order for this student
+  let puzzles = data.puzzles || [data]; // back-compat single puzzle
+  // Shuffle question order
+  puzzles = shuffleArr([...puzzles]);
+  allPuzzles = puzzles;
+  qStates = puzzles.map(() => ({ checkResult: null, runOutput: '', didRun: false, placed: [], runScored: false }));
+  currentQIdx = 0;
+  renderQNav();
+  loadQ(0);
+}
+function shuffleArr(arr) {
+  for (let i = arr.length-1; i > 0; i--) {
+    const j = Math.floor(Math.random()*(i+1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+function renderQNav() {
+  const row = document.getElementById('qnav-row');
+  if (allPuzzles.length <= 1) { row.style.display='none'; return; }
+  row.style.display = 'flex';
+  row.innerHTML = '<span style="font-size:12px;color:var(--muted);font-weight:700">ข้อ:</span>';
+  allPuzzles.forEach((p, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'qnav-btn' + (i===currentQIdx?' active-q':'');
+    btn.textContent = `${i+1}. ${p.title.slice(0,18)}`;
+    btn.onclick = () => { saveCurrentQState(); loadQ(i); };
+    if (qStates[i].checkResult === true) btn.classList.add('done-q');
+    else if (qStates[i].runScored) btn.classList.add('done-q'); // รันสำเร็จ = ได้คะแนน
+    else if (qStates[i].checkResult === false) btn.classList.add('wrong-q');
+    row.appendChild(btn);
   });
 }
 
-function generatePuzzle() {
-  const title = document.getElementById('ptitle-in').value || 'โจทย์ Python';
-  const desc  = document.getElementById('pdesc-in').value  || '';
-  const orderStr = document.getElementById('ans-order').value;
-  const rows = [...document.querySelectorAll('.bitem')];
-  const allCodes = rows.map(r => r.querySelector('textarea').value);
-  const allNicks = rows.map(r => r.querySelector('.nick-input').value.trim());
-  const ansOrder = orderStr.split(',').map(s=>parseInt(s.trim())-1).filter(n=>!isNaN(n));
-
-  if (allCodes.length < 2) { alert('กรุณาเพิ่มบล็อกโค้ดอย่างน้อย 2 บล็อก'); return; }
-  if (ansOrder.length < 1) { alert('กรุณาระบุลำดับคำตอบ'); return; }
-
-  puzzleData = { title, desc, blocks: allCodes, nicks: allNicks, answerOrder: ansOrder };
-  const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(puzzleData))));
-  document.getElementById('export-area').style.display = 'block';
-  document.getElementById('export-area').textContent = 'PUZZLE:' + encoded;
-  document.getElementById('copybtn').style.display = 'inline-block';
-  alert('✅ สร้างโจทย์สำเร็จ!\nกด "สลับโหมด" เพื่อทดสอบ หรือคัดลอก code แจกนักเรียน');
-}
-function copyPuzzle() {
-  navigator.clipboard.writeText(document.getElementById('export-area').textContent)
-    .then(()=>alert('คัดลอกแล้ว! ส่งให้นักเรียนวางในช่อง "โหลดโจทย์จากครู"'));
+function saveCurrentQState() {
+  if (!allPuzzles.length) return;
+  // save current src/ans zone blocks
+  const ans = [...document.getElementById('ans-zone').querySelectorAll('.cblock')];
+  const src = [...document.getElementById('src-zone').querySelectorAll('.cblock')];
+  qStates[currentQIdx].ansBlocks = ans.map(b => ({ rawcode: b.dataset.rawcode, origIdx: b.dataset.origIdx, indent: b.dataset.indent }));
+  qStates[currentQIdx].srcBlocks = src.map(b => ({ rawcode: b.dataset.rawcode, origIdx: b.dataset.origIdx, indent: b.dataset.indent }));
+  qStates[currentQIdx].runOutput = lastRunOutput;
 }
 
-/* ══════════════════════════════════════
-   STUDENT
-══════════════════════════════════════ */
-function loadPuzzle(data) {
-  document.getElementById('qtitle').textContent = data.title;
-  document.getElementById('qdesc').textContent  = data.desc;
-  const src = document.getElementById('src-zone');
-  src.innerHTML = '';
-
-  /* shuffle */
-  const items = data.blocks.map((code,i)=>({ code, nick:(data.nicks||[])[i]||'', origIdx:i }));
-  for(let i=items.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [items[i],items[j]]=[items[j],items[i]]; }
-  items.forEach(it => src.appendChild(makeCBlock(it.code, it.nick, it.origIdx)));
-
-  document.getElementById('ans-zone').innerHTML = '';
+function loadQ(idx) {
+  currentQIdx = idx;
+  const p = allPuzzles[idx];
+  document.getElementById('qtitle').textContent = p.title;
+  document.getElementById('qdesc').textContent = p.desc || '';
   document.getElementById('rbox').className = 'rbox';
   clearTerm();
-  termLine('i','>>> โหลดโจทย์: "'+data.title+'" — เรียงโค้ดแล้วกด ▶ รันโค้ด');
+
+  const src = document.getElementById('src-zone');
+  const ans = document.getElementById('ans-zone');
+  src.innerHTML = ''; ans.innerHTML = '';
+
+  // Restore saved state or shuffle fresh
+  const st = qStates[idx];
+  if (st.ansBlocks && st.ansBlocks.length) {
+    st.ansBlocks.forEach(b => ans.appendChild(makeCBlock(b.rawcode, b.origIdx, p.nicks[b.origIdx]||'')));
+    st.srcBlocks.forEach(b => src.appendChild(makeCBlock(b.rawcode, b.origIdx, p.nicks[b.origIdx]||'')));
+  } else {
+    const items = p.blocks.map((code,i) => ({ code, nick:(p.nicks||[])[i]||'', origIdx:i }));
+    shuffleArr(items).forEach(it => src.appendChild(makeCBlock(it.code, it.origIdx, it.nick)));
+  }
+
+  if (st.checkResult === true) { document.getElementById('rbox').className='rbox ok'; document.getElementById('rbox').textContent='🎉 ถูกต้อง!'; }
+  else if (st.checkResult === false) { document.getElementById('rbox').className='rbox ng'; document.getElementById('rbox').textContent='❌ ยังไม่ถูกต้อง'; }
+
+  if (st.runOutput) {
+    lastRunOutput = st.runOutput;
+    st.runOutput.split('\n').filter(Boolean).forEach(l => {
+      const d = document.createElement('div'); d.className='lo'; d.textContent=l;
+      document.getElementById('term').appendChild(d);
+    });
+  } else {
+    termLine('i', `>>> ข้อ ${idx+1}: "${p.title}" — เรียงโค้ดแล้วกด ▶`);
+  }
+
+  renderQNav();
 }
 
-function makeCBlock(code, nick, origIdx) {
+/* ══════════════════════ STUDENT — DRAG BLOCKS ══════════════════════ */
+function makeCBlock(code, origIdx, nick) {
   const div = document.createElement('div');
-  div.className = 'cblock';
-  div.draggable = true;
+  div.className = 'cblock'; div.draggable = true;
   div.dataset.origIdx = origIdx;
-  div.dataset.indent  = 0;
-  div.dataset.rawcode = code;   /* store original code for running */
-
+  div.dataset.indent = 0;
+  div.dataset.rawcode = code;
   const hasNick = nick && nick.trim();
   div.innerHTML = `
     <span class="grip">⠿⠿</span>
-    <div class="block-display">
-      ${hasNick ? `<span class="block-nick">📦 ${esc(nick)}</span>` : ''}
-      <span class="block-code-text">${esc(code)}</span>
-      ${hasNick ? `<span class="show-code-toggle" onclick="toggleCode(this)">▸ ดูโค้ด</span>` : ''}
+    <div class="blk-disp">
+      ${hasNick ? `<span class="blk-nick">📦 ${esc(nick)}</span>` : ''}
+      <span class="blk-code">${esc(code)}</span>
+      ${hasNick ? `<span class="show-tog" onclick="toggleCode(this)">▸ ดูโค้ด</span>` : ''}
     </div>
     <div class="ictl">
-      <button class="ibtn" onclick="chgIndent(this,-1)" title="ลด indent">←</button>
+      <button class="ibtn" onclick="chgIndent(this,-1)">←</button>
       <span class="ilvl">0</span>
-      <button class="ibtn" onclick="chgIndent(this,1)"  title="เพิ่ม indent">→</button>
+      <button class="ibtn" onclick="chgIndent(this,1)">→</button>
     </div>`;
-
-  /* if has nick, hide code by default */
-  if (hasNick) {
-    div.querySelector('.block-code-text').style.display = 'none';
-  }
-
-  div.addEventListener('dragstart', ()=>{ dragEl=div; setTimeout(()=>div.classList.add('dragging'),0); });
-  div.addEventListener('dragend',   ()=>div.classList.remove('dragging'));
+  if (hasNick) div.querySelector('.blk-code').style.display = 'none';
+  div.addEventListener('dragstart', () => { dragEl=div; setTimeout(()=>div.classList.add('dragging'),0); });
+  div.addEventListener('dragend',   () => div.classList.remove('dragging'));
   return div;
 }
-
 function toggleCode(el) {
-  const codeEl = el.parentElement.querySelector('.block-code-text');
-  const hidden = codeEl.style.display === 'none';
-  codeEl.style.display = hidden ? 'block' : 'none';
-  el.textContent = hidden ? '▾ ซ่อนโค้ด' : '▸ ดูโค้ด';
+  const c = el.parentElement.querySelector('.blk-code');
+  const h = c.style.display==='none';
+  c.style.display = h?'block':'none';
+  el.textContent = h?'▾ ซ่อนโค้ด':'▸ ดูโค้ด';
 }
-
 function chgIndent(btn, delta) {
   const blk = btn.closest('.cblock');
   let lv = Math.max(0, Math.min(6, parseInt(blk.dataset.indent||0)+delta));
   blk.dataset.indent = lv;
   btn.parentElement.querySelector('.ilvl').textContent = lv;
-  /* update displayed code + rawcode indent */
   const raw = blk.dataset.rawcode.replace(/^ +/,'');
-  const indented = '    '.repeat(lv) + raw;
-  blk.dataset.rawcode = indented;
-  blk.querySelector('.block-code-text').textContent = indented;
+  const ind = '    '.repeat(lv) + raw;
+  blk.dataset.rawcode = ind;
+  blk.querySelector('.blk-code').textContent = ind;
 }
-
-/* ── DRAG & DROP ── */
 function dOver(e)  { e.preventDefault(); e.currentTarget.classList.add('over'); }
 function dLeave(e) { e.currentTarget.classList.remove('over'); }
 function dDrop(e, zone) {
   e.preventDefault(); e.currentTarget.classList.remove('over');
   if (!dragEl) return;
   const target = document.getElementById(zone==='ans'?'ans-zone':'src-zone');
-  const after  = dragAfter(target, e.clientY);
+  const after = dragAfter(target, e.clientY);
   if (after) target.insertBefore(dragEl, after); else target.appendChild(dragEl);
   dragEl = null;
 }
 function dragAfter(container, y) {
-  return [...container.querySelectorAll('.cblock:not(.dragging)')].reduce((cl,ch)=>{
+  return [...container.querySelectorAll('.cblock:not(.dragging)')].reduce((cl,ch) => {
     const b = ch.getBoundingClientRect();
     const o = y - b.top - b.height/2;
     return (o<0 && o>cl.offset) ? {offset:o,element:ch} : cl;
   },{offset:-Infinity}).element;
 }
 
-/* ── CHECK / RESET ── */
 function checkAns() {
-  if (!puzzleData) { alert('ยังไม่มีโจทย์'); return; }
+  if (!allPuzzles.length) { alert('ยังไม่มีโจทย์'); return; }
+  const p = allPuzzles[currentQIdx];
   const placed = [...document.getElementById('ans-zone').querySelectorAll('.cblock')];
-  if (!placed.length) { alert('กรุณาลากโค้ดมาเรียงในพื้นที่คำตอบก่อน'); return; }
+  if (!placed.length) { alert('กรุณาลากโค้ดมาเรียงก่อน'); return; }
   const stuOrder = placed.map(b=>parseInt(b.dataset.origIdx));
-  const ok = JSON.stringify(stuOrder) === JSON.stringify(puzzleData.answerOrder);
+  const ok = JSON.stringify(stuOrder) === JSON.stringify(p.answerOrder);
+  qStates[currentQIdx].checkResult = ok;
   const rb = document.getElementById('rbox');
-  if (ok) {
-    rb.className='rbox ok'; rb.textContent='🎉 ถูกต้อง! เรียงโค้ดได้ถูกต้องทุกบล็อก!';
-  } else {
-    rb.className='rbox ng';
-    rb.innerHTML=`❌ ยังไม่ถูกต้อง — ลำดับที่เรียง: [${stuOrder.map(i=>i+1).join(', ')}] ลองใหม่อีกครั้ง`;
-  }
+  if (ok) { rb.className='rbox ok'; rb.textContent='🎉 ถูกต้อง! ข้อนี้เรียงได้ถูกต้องแล้ว'; }
+  else { rb.className='rbox ng'; rb.innerHTML=`❌ ยังไม่ถูกต้อง — ลำดับที่เรียง: [${stuOrder.map(i=>i+1).join(', ')}]`; }
+  renderQNav();
 }
-function resetStudent() { if (puzzleData) loadPuzzle(puzzleData); }
 
-function tryLoad() {
-  const v = prompt('วาง Code โจทย์จากครู (เริ่มด้วย PUZZLE:)');
-  if (!v) return;
+function resetQ() {
+  if (!allPuzzles.length) return;
+  qStates[currentQIdx] = { checkResult: null, runOutput: '', didRun: false };
+  loadQ(currentQIdx);
+}
+
+/* ══════════════════════ STUDENT — EXPORT ══════════════════════ */
+function exportWork() {
+  const name = document.getElementById('student-name').value.trim();
+  if (!name) { alert('กรุณากรอกชื่อนักเรียนก่อน Export'); return; }
+  if (!allPuzzles.length) { alert('ยังไม่มีโจทย์'); return; }
+
+  saveCurrentQState();
+
+  const results = allPuzzles.map((p, i) => {
+    const st = qStates[i];
+    const ansBlocks = st.ansBlocks || [];
+    const stuOrder = ansBlocks.map(b => parseInt(b.origIdx));
+    const finalCode = ansBlocks.map(b => b.rawcode||'').join('\n');
+    return {
+      puzzleTitle: p.title,
+      puzzleIdx: i,
+      answerOrder: stuOrder,
+      correctOrder: p.answerOrder,
+      isCorrect: st.checkResult,
+      didRun: st.didRun,
+      runScored: st.runScored || false,
+      maxScore: p.maxScore || 10,
+      runOutput: (st.runOutput||'').slice(0,2000),
+      finalCode,
+      puzzleData: p,
+    };
+  });
+
+  const payload = { studentName: name, submittedAt: new Date().toISOString(), results };
+  const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+
+  const codePreview = results.map((r,i) =>
+    `=== ข้อ ${i+1}: ${r.puzzleTitle} ${r.isCorrect===true?'✓':r.isCorrect===false?'✗':'?'} ===\n${r.finalCode||'(ยังไม่ได้เรียง)'}`
+  ).join('\n\n');
+
+  const html = `<!DOCTYPE html><html lang="th"><head><meta charset="UTF-8"><title>งานของ ${esc(name)}</title><meta name="pypuzzle-submission" content="${encoded}"></head><body style="font-family:monospace;background:#07090f;color:#dde4ff;padding:20px"><h2 style="color:#00e5b0">📄 งาน PyPuzzle — ${esc(name)}</h2><p style="color:#5a6494;font-size:12px;margin:6px 0 14px">ส่งงานเมื่อ: ${new Date().toLocaleString('th-TH')}</p><pre style="background:#060810;padding:14px;border-radius:8px;border:1px solid #2a3252;font-size:13px;overflow-x:auto;line-height:1.6">${esc(codePreview)}</pre></body></html>`;
+
+  downloadHTML(html, `งาน_${name.replace(/\s+/g,'_')}_PyPuzzle.html`);
+  alert('✅ ส่งงานสำเร็จ! ไฟล์ถูกดาวน์โหลดแล้ว — ส่งให้ครูตรวจได้เลย');
+}
+
+/* ══════════════════════ REVIEW — IMPORT ══════════════════════ */
+function dzOver(e)  { e.preventDefault(); document.getElementById('drop-zone').classList.add('dzon'); }
+function dzLeave(e) { document.getElementById('drop-zone').classList.remove('dzon'); }
+function dzDrop(e)  { e.preventDefault(); document.getElementById('drop-zone').classList.remove('dzon'); importFiles2([...e.dataTransfer.files]); }
+function importFiles(e) { importFiles2([...e.target.files]); e.target.value=''; }
+
+function importFiles2(files) {
+  const htmls = files.filter(f => f.name.endsWith('.html'));
+  if (!htmls.length) { alert('กรุณาเลือกไฟล์ .html'); return; }
+  let done = 0;
+  htmls.forEach(f => {
+    const r = new FileReader();
+    r.onload = ev => {
+      const parsed = parseSubmission(ev.target.result);
+      if (parsed) {
+        const exists = studentAnswers.findIndex(s => s.studentName===parsed.studentName);
+        if (exists >= 0) studentAnswers[exists] = parsed; else studentAnswers.push(parsed);
+      }
+      done++;
+      if (done === htmls.length) {
+        refreshReviewList();
+        // Auto-grade all loaded students
+        studentAnswers.forEach((_, i) => { if (!studentAnswers[i]._aiGrade) gradeStudent(i); });
+      }
+    };
+    r.readAsText(f);
+  });
+}
+
+function parseSubmission(html) {
   try {
-    const json = decodeURIComponent(escape(atob(v.replace('PUZZLE:','').trim())));
-    puzzleData = JSON.parse(json);
-    loadPuzzle(puzzleData);
-  } catch(e) { alert('Code ไม่ถูกต้อง กรุณาตรวจสอบใหม่'); }
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    const meta = doc.querySelector('meta[name="pypuzzle-submission"]');
+    if (!meta) return null;
+    const json = decodeURIComponent(escape(atob(meta.getAttribute('content'))));
+    return JSON.parse(json);
+  } catch(e) { return null; }
 }
 
-/* ── UTILS ── */
-function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+/* ══════════════════════ REVIEW — AI GRADING ══════════════════════ */
+async function gradeStudent(i) {
+  const s = studentAnswers[i];
+  if (!s || s._aiGrading) return;
+  s._aiGrading = true;
+  s._aiGrade = null;
+  refreshReviewList();
 
-/* ── INIT SAMPLE ── */
-addBlock('total = 0',            'เริ่มต้นตัวแปร');
-addBlock('for i in range(1, 11):','วนลูป 1 ถึง 10');
-addBlock('    total += i',        'บวกสะสม');
-addBlock('print("ผลรวม =", total)','แสดงผล');
-document.getElementById('ptitle-in').value = 'จงเรียงโค้ดให้คำนวณผลรวม 1 ถึง 10';
-document.getElementById('pdesc-in').value  = 'เรียงบล็อกโค้ดให้ถูกต้อง เพื่อให้โปรแกรมแสดงผลรวมของเลข 1 ถึง 10';
-document.getElementById('ans-order').value = '1,2,3,4';
+  const results = s.results || [];
+  const prompt = buildGradePrompt(s.studentName, results);
+
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: `คุณคือผู้ช่วยครูที่ตรวจการบ้านโจทย์เรียงโค้ด Python ของนักเรียน ตอบเป็นภาษาไทย ตอบใน JSON เท่านั้น ไม่มี markdown backtick ไม่มีข้อความอื่น`,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await resp.json();
+    const text = (data.content||[]).map(c=>c.text||'').join('');
+    const clean = text.replace(/```json|```/g,'').trim();
+    const grade = JSON.parse(clean);
+    s._aiGrade = grade;
+  } catch(e) {
+    s._aiGrade = { score: '?', comment: 'ไม่สามารถเชื่อมต่อ AI ได้ กรุณาตรวจสอบการเชื่อมต่อ', perQuestion: [] };
+  }
+  s._aiGrading = false;
+  refreshReviewList();
+  if (selStuIdx === i) showStudent(i);
+}
+
+function buildGradePrompt(name, results) {
+  const totalMax = results.reduce((s,r) => s + (r.maxScore||10), 0);
+  const qDetails = results.map((r, i) => {
+    const correctOrder = (r.correctOrder||[]).map(n=>n+1).join(',');
+    const stuOrder = (r.answerOrder||[]).map(n=>n+1).join(',');
+    const isCorrect = r.isCorrect;
+    const runScored = r.runScored || r.didRun;
+    const maxScore = r.maxScore || 10;
+    const earnedScore = runScored ? maxScore : 0;
+    return `ข้อ ${i+1}: ${r.puzzleTitle} (คะแนนเต็ม ${maxScore} คะแนน)
+- ลำดับที่ถูก: [${correctOrder}]
+- ลำดับนักเรียน: [${stuOrder}]
+- ผลตรวจลำดับ: ${isCorrect===true?'ถูกต้อง':isCorrect===false?'ผิด':'ยังไม่ได้ตรวจ'}
+- รันโค้ดสำเร็จ (ไม่มี error): ${runScored?'✅ ใช่':'❌ ไม่'}
+- คะแนนที่ได้: ${earnedScore}/${maxScore} (${runScored?'รันสำเร็จ ได้คะแนนเต็ม':'ยังไม่ได้รัน หรือ error'})
+- Output: ${r.runOutput||'(ไม่มี)'}
+- โค้ดที่เรียง:\n${r.finalCode||'(ว่าง)'}`;
+  }).join('\n\n');
+
+  // Pre-calculate scores
+  const earnedTotal = results.reduce((s,r) => s + ((r.runScored||r.didRun) ? (r.maxScore||10) : 0), 0);
+
+  return `ตรวจงานของ "${name}" ที่มีทั้งหมด ${results.length} ข้อ (คะแนนรวม ${earnedTotal}/${totalMax}):
+
+${qDetails}
+
+หมายเหตุ: ระบบให้คะแนนตามเงื่อนไข "รันโค้ดสำเร็จไม่มี error = ได้คะแนนเต็มข้อนั้น"
+
+ตอบ JSON รูปแบบนี้เท่านั้น:
+{
+  "score": "${earnedTotal}/${totalMax}",
+  "percent": ${Math.round(earnedTotal/totalMax*100)},
+  "comment": "ความเห็นรวมภาษาไทย 2-3 ประโยค เชิงบวกและสร้างสรรค์",
+  "perQuestion": [
+    {"q": 1, "correct": true, "earned": 10, "maxScore": 10, "note": "ความเห็นสั้นๆ เฉพาะข้อ"},
+    ...
+  ]
+}`;
+}
+
+/* ══════════════════════ REVIEW — UI ══════════════════════ */
+function refreshReviewList() {
+  const list = document.getElementById('stu-list');
+  const wrap = document.getElementById('clear-wrap');
+  if (!studentAnswers.length) {
+    list.innerHTML = '<div style="font-size:12px;color:var(--muted)">ยังไม่มีข้อมูล</div>';
+    wrap.style.display = 'none'; return;
+  }
+  wrap.style.display = 'flex';
+  list.innerHTML = '';
+
+  // Refresh import list
+  const impList = document.getElementById('import-list');
+  impList.innerHTML = '';
+  studentAnswers.forEach((s, i) => {
+    const rr = s.results || [];
+    const totalMax3 = rr.reduce((a,r)=>a+(r.maxScore||10),0);
+    const earned3   = rr.reduce((a,r)=>a+((r.runScored||r.didRun)?(r.maxScore||10):0),0);
+    const pct3 = totalMax3>0?Math.round(earned3/totalMax3*100):0;
+    const d = document.createElement('div'); d.className='import-item';
+    d.innerHTML = `<span class="iname">${esc(s.studentName)}</span>
+      <span class="imeta">${s.results?s.results.length:0} ข้อ</span>
+      ${s._aiGrading?'<span style="font-size:11px;color:var(--muted)">AI กำลังตรวจ…</span>':''}
+      <span style="font-size:12px;font-weight:700;color:${pct3>=70?'var(--success)':pct3>=50?'var(--warn)':'var(--danger)'}">${earned3}/${totalMax3}</span>
+      <button class="imp-rm" onclick="removeStu(${i})">✕</button>`;
+    impList.appendChild(d);
+  });
+
+  studentAnswers.forEach((s, i) => {
+    const g = s._aiGrade;
+    const div = document.createElement('div');
+    div.className = 'stu-item' + (i===selStuIdx?' sel':'');
+    div.onclick = () => showStudent(i);
+    // Always compute rule-based score
+    const rr = s.results || [];
+    const totalMax2 = rr.reduce((a,r)=>a+(r.maxScore||10),0);
+    const earned2   = rr.reduce((a,r)=>a+((r.runScored||r.didRun)?(r.maxScore||10):0),0);
+    const pct2 = totalMax2>0?Math.round(earned2/totalMax2*100):0;
+    let badge = `<span class="sbadge ${pct2>=70?'ok':pct2>=50?'part':'ng'}">${earned2}/${totalMax2} (${pct2}%)</span>`;
+    if (s._aiGrading) badge += '<span class="sbadge none" style="margin-left:4px">⏳ AI…</span>';
+    div.innerHTML = `<div class="sname">${esc(s.studentName)}</div>
+      <div class="smeta">${new Date(s.submittedAt).toLocaleString('th-TH')}</div>${badge}`;
+    list.appendChild(div);
+  });
+}
+
+function showStudent(i) {
+  selStuIdx = i;
+  refreshReviewList();
+  const s = studentAnswers[i];
+  const g = s._aiGrade;
+  const main = document.getElementById('rmain');
+
+  // ─── Quick rule-based score (ไม่ต้องรอ AI) ───
+  const results = s.results || [];
+  const totalMax = results.reduce((acc,r) => acc + (r.maxScore||10), 0);
+  const earned   = results.reduce((acc,r) => acc + ((r.runScored||r.didRun) ? (r.maxScore||10) : 0), 0);
+  const pctQuick = totalMax > 0 ? Math.round(earned/totalMax*100) : 0;
+  const colorQ   = pctQuick>=70?'var(--success)':pctQuick>=50?'var(--warn)':'var(--danger)';
+  const quickRows = results.map((r,qi) => {
+    const ms = r.maxScore||10;
+    const got = (r.runScored||r.didRun) ? ms : 0;
+    const orderOk = r.isCorrect===true;
+    return `<div style="display:flex;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--border)">
+      <span style="font-size:11px;color:var(--muted);font-family:var(--fm);min-width:32px">ข้อ ${qi+1}</span>
+      <span style="font-size:12px;flex:1;color:var(--text)">${esc(r.puzzleTitle||'')}</span>
+      <span style="font-size:11px;color:var(--muted)">${(r.runScored||r.didRun)?'▶ รันสำเร็จ':'⚠ ยังไม่ได้รัน'}</span>
+      ${orderOk?'<span style="font-size:11px;color:var(--accent2)">⭐ เรียงถูก</span>':''}
+      <span style="font-size:13px;font-weight:800;color:${got>0?'var(--accent2)':'var(--danger)'}">${got}/${ms}</span>
+    </div>`;
+  }).join('');
+  const quickHTML = `<div style="background:rgba(61,127,255,.05);border:1px solid rgba(61,127,255,.2);border-radius:13px;padding:16px;margin-bottom:14px">
+    <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;font-family:var(--fm)">📊 คะแนนตามเกณฑ์ (รันสำเร็จ = ได้คะแนน)</div>
+    <div style="font-size:30px;font-weight:800;color:${colorQ};margin-bottom:8px">${earned}<span style="font-size:14px;color:var(--muted)">/${totalMax}</span> <span style="font-size:14px">(${pctQuick}%)</span></div>
+    <div style="border-top:1px solid var(--border);padding-top:8px">${quickRows}</div>
+  </div>`;
+
+  let aiHTML = '';
+  if (s._aiGrading) {
+    aiHTML = `<div class="ai-box loading"><div class="ai-title">🤖 AI กำลังตรวจ…</div>
+      <div class="ai-thinking"><div class="ai-spinner"></div>วิเคราะห์งานของ ${esc(s.studentName)}</div></div>`;
+  } else if (g) {
+    const pct = g.percent||0;
+    const color = pct>=70?'var(--success)':pct>=50?'var(--warn)':'var(--danger)';
+    const perQ = (g.perQuestion||[]).map(q=>
+      `<div style="display:flex;gap:8px;align-items:start;padding:7px 0;border-bottom:1px solid var(--border)">
+        <span style="font-size:11px;color:var(--muted);font-family:var(--fm);min-width:32px">ข้อ ${q.q}</span>
+        <span style="font-size:11px;flex-shrink:0">${q.correct?'✅':'❌'}</span>
+        <span style="font-size:12px;color:var(--text);line-height:1.5;flex:1">${esc(q.note||'')}</span>
+        <span style="font-size:12px;font-weight:700;color:var(--warn);white-space:nowrap">${q.earned !== undefined ? q.earned : (q.correct ? (q.maxScore||'') : 0)}${q.maxScore !== undefined ? '/'+q.maxScore : ''}</span>
+      </div>`
+    ).join('');
+    aiHTML = `<div class="ai-box done">
+      <div class="ai-title">🤖 ผลตรวจ AI</div>
+      <div class="ai-score" style="color:${color}">${g.score} <span style="font-size:16px">(${pct}%)</span></div>
+      <div class="ai-comment" style="margin-bottom:12px">${esc(g.comment||'')}</div>
+      ${perQ ? `<div style="border-top:1px solid var(--border);padding-top:8px;margin-top:4px">${perQ}</div>` : ''}
+    </div>`;
+  } else {
+    aiHTML = `<div class="ai-box err"><div class="ai-title">🤖 AI</div><div style="font-size:12px;color:var(--muted)">ยังไม่ได้ตรวจ <button class="qnav-btn" onclick="gradeStudent(${i})" style="margin-left:8px;font-size:11px">ตรวจใหม่</button></div></div>`;
+  }
+
+  // per-question details
+  const qTabs = results.length > 1
+    ? `<div class="ptab-row">${results.map((_,qi)=>`<button class="ptab ${qi===0?'ap':''}" id="ptab-${qi}" onclick="showQDetail(${qi})">${qi+1}. ${esc((results[qi].puzzleTitle||'').slice(0,16))}</button>`).join('')}</div>`
+    : '';
+
+  main.innerHTML = `
+    <div style="margin-bottom:14px">
+      <div style="font-size:18px;font-weight:800;color:var(--text)">${esc(s.studentName)}</div>
+      <div style="font-size:11px;color:var(--muted);font-family:var(--fm);margin-top:3px">ส่งเมื่อ ${new Date(s.submittedAt).toLocaleString('th-TH')} | ${results.length} ข้อ
+        <button class="qnav-btn" onclick="gradeStudent(${i})" style="font-size:10px;padding:3px 9px;margin-left:8px">🔄 ตรวจใหม่</button>
+      </div>
+    </div>
+    ${quickHTML}
+    ${aiHTML}
+    ${qTabs}
+    <div id="qdetail-wrap"></div>`;
+
+  showQDetail(0, results);
+}
+
+function showQDetail(qi, results) {
+  const s = studentAnswers[selStuIdx];
+  const res = results || s.results || [];
+  // update tab highlights
+  document.querySelectorAll('.ptab').forEach((t,i) => t.classList.toggle('ap', i===qi));
+
+  const r = res[qi]; if (!r) return;
+  const pd = r.puzzleData;
+  let orderHTML = '';
+  if (pd && r.answerOrder && r.answerOrder.length) {
+    const rows = r.answerOrder.map((blockIdx, pos) => {
+      const code = pd.blocks[blockIdx]||'?';
+      const correctIdx = pd.answerOrder ? pd.answerOrder[pos] : -1;
+      const ok = blockIdx === correctIdx;
+      const expected = pd.answerOrder && pd.blocks ? (pd.blocks[pd.answerOrder[pos]]||'') : '';
+      return `<div class="order-blk ${ok?'correct':'wrong'}">
+        <span class="order-num">#${pos+1}</span>
+        <span class="order-code">${esc(code)}</span>
+        <span class="order-mark">${ok?'✅':'❌'}</span>
+      </div>${!ok?`<div style="padding:2px 0 3px 32px;font-size:11px;color:var(--muted);font-family:var(--fm)">↳ ควรเป็น: ${esc(expected)}</div>`:''}`;
+    }).join('');
+    orderHTML = `<div class="review-order"><div class="ro-title">ลำดับที่นักเรียนเรียง vs ที่ถูกต้อง</div><div class="order-blocks">${rows}</div></div>`;
+  }
+  document.getElementById('qdetail-wrap').innerHTML = `
+    ${orderHTML}
+    <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:7px;font-family:var(--fm)">📟 โค้ดที่ส่งมา</div>
+    <div class="rterm">${esc(r.finalCode||'(ว่าง)')}</div>
+    ${r.runOutput?`<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin:12px 0 7px;font-family:var(--fm)">📺 Output</div><div class="rterm">${esc(r.runOutput)}</div>`:''}`;
+}
+
+function removeStu(i) {
+  studentAnswers.splice(i,1);
+  if (selStuIdx===i) { selStuIdx=null; document.getElementById('rmain').innerHTML='<div class="rempty"><div style="font-size:32px">👈</div><div>เลือกนักเรียน</div></div>'; }
+  else if (selStuIdx>i) selStuIdx--;
+  refreshReviewList();
+}
+function clearAll() {
+  if (!confirm('ล้างข้อมูลทั้งหมด?')) return;
+  studentAnswers=[]; selStuIdx=null;
+  document.getElementById('rmain').innerHTML='<div class="rempty"><div style="font-size:32px">👈</div><div>เลือกนักเรียน</div></div>';
+  refreshReviewList();
+}
+
+/* ══════════════════════ BUILD STUDENT HTML ══════════════════════ */
+function buildStudentHTML(encoded) {
+  return `<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PyPuzzle</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Kanit:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.js"><\/script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#07090f;--surface:#0e1118;--surface2:#141824;--border:#1e2538;--border2:#2a3252;--accent:#3d7fff;--accent2:#00e5b0;--warn:#ffb800;--danger:#ff4560;--text:#dde4ff;--muted:#5a6494;--muted2:#3a4060;--code-bg:#060810;--fm:'JetBrains Mono',monospace;--fu:'Kanit',sans-serif;}
+body{font-family:var(--fu);background:var(--bg);color:var(--text);min-height:100vh;background-image:radial-gradient(ellipse at 15% 15%,rgba(61,127,255,.07) 0%,transparent 55%),radial-gradient(ellipse at 85% 85%,rgba(0,229,176,.05) 0%,transparent 55%)}
+header{background:rgba(14,17,24,.9);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:12px 22px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:100}
+.logo{font-family:var(--fm);font-size:17px;font-weight:700;letter-spacing:-1px}.logo .py{color:var(--accent)}.logo .puz{color:var(--accent2)}
+.badge{font-size:10px;font-weight:700;padding:3px 10px;border-radius:99px;text-transform:uppercase;letter-spacing:.8px;font-family:var(--fm);background:rgba(0,229,176,.1);color:var(--accent2);border:1px solid rgba(0,229,176,.25)}
+.hs{flex:1}.py-status{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--muted);font-family:var(--fm)}
+.pydot{width:7px;height:7px;border-radius:50%;background:var(--muted)}.pydot.ok{background:var(--accent2);box-shadow:0 0 7px var(--accent2)}.pydot.loading{background:var(--warn);animation:pulse 1.2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.75)}}
+.app{max-width:1100px;margin:0 auto;padding:22px 16px}
+.name-row{display:flex;gap:8px;align-items:center;margin-bottom:14px}
+.name-row label{font-size:12px;font-weight:700;color:var(--muted);white-space:nowrap;font-family:var(--fm)}
+input[type=text]{background:var(--code-bg);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:9px 12px;font-size:13px;font-family:var(--fu);outline:none;transition:.15s}
+input[type=text]:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(61,127,255,.22)}
+.qnav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
+.qnav-lbl{font-size:12px;color:var(--muted);font-weight:700;font-family:var(--fm)}
+.qbtn{background:var(--surface2);border:1px solid var(--border2);color:var(--muted);padding:6px 12px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:700;transition:.15s;font-family:var(--fu)}
+.qbtn:hover{border-color:var(--accent);color:var(--accent)}.qbtn.aq{background:rgba(61,127,255,.12);border-color:var(--accent);color:var(--accent)}.qbtn.dq{background:rgba(0,229,176,.08);border-color:rgba(0,229,176,.35);color:var(--accent2)}.qbtn.wq{background:rgba(255,69,96,.08);border-color:rgba(255,69,96,.3);color:var(--danger)}
+.qbox{background:linear-gradient(135deg,rgba(61,127,255,.08),rgba(0,229,176,.04));border:1px solid var(--border2);border-radius:14px;padding:16px 20px;margin-bottom:16px}
+.qtitle{font-size:16px;font-weight:700;color:var(--warn);margin-bottom:6px}.qdesc{font-size:13px;color:var(--text);line-height:1.65;opacity:.85}
+.sgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+@media(max-width:660px){.sgrid{grid-template-columns:1fr}}
+.zlabel{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;font-family:var(--fm);display:flex;align-items:center;gap:7px}
+.zdot{width:7px;height:7px;border-radius:50%;display:inline-block;flex-shrink:0}.zdot.s{background:var(--warn)}.zdot.a{background:var(--accent)}
+.dzone{min-height:190px;background:var(--surface);border:2px dashed var(--border2);border-radius:13px;padding:8px;transition:.2s}
+.dzone.over{border-color:var(--accent);background:rgba(61,127,255,.07);border-style:solid}.dzone.az{border-color:rgba(0,229,176,.2)}
+.cblock{background:var(--code-bg);border:1px solid var(--border2);border-radius:10px;padding:9px 10px;margin-bottom:6px;cursor:grab;user-select:none;transition:.15s;display:flex;align-items:stretch;gap:8px}
+.cblock:active{cursor:grabbing}.cblock.dragging{opacity:.22;border-style:dashed;transform:scale(.97)}.cblock:hover{border-color:var(--accent)}
+.grip{color:var(--muted2);font-size:10px;flex-shrink:0;display:flex;align-items:center;padding-right:3px;letter-spacing:-1px}
+.bdisp{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.bnick{font-size:11px;font-weight:700;color:#9eb0ff;background:rgba(61,127,255,.12);border-radius:5px;padding:2px 8px;display:inline-block;width:fit-content}
+.bcode{font-family:var(--fm);font-size:12px;white-space:pre;overflow-x:auto;color:#c8d4f8;line-height:1.55}
+.btog{font-size:10px;color:rgba(61,127,255,.5);cursor:pointer;margin-top:1px;font-family:var(--fm)}
+.btog:hover{color:var(--accent)}
+.ictl{display:flex;align-items:center;gap:3px;flex-shrink:0;align-self:center}
+.ibtn{background:var(--surface2);border:1px solid var(--border2);color:var(--muted);width:20px;height:20px;border-radius:5px;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;transition:.1s}
+.ibtn:hover{border-color:var(--accent);color:var(--accent)}.ilvl{font-size:10px;color:var(--muted);min-width:12px;text-align:center;font-family:var(--fm)}
+.arow{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.runbtn{background:var(--accent);border:none;color:#fff;padding:10px 20px;border-radius:10px;cursor:pointer;font-size:13px;font-weight:700;transition:.15s;display:flex;align-items:center;gap:7px;font-family:var(--fu);box-shadow:0 3px 14px rgba(61,127,255,.35)}
+.runbtn:hover{background:#5590ff}.runbtn:disabled{opacity:.4;cursor:not-allowed;box-shadow:none}
+.chkbtn{background:var(--accent2);border:none;color:#07090f;padding:10px 20px;border-radius:10px;cursor:pointer;font-size:13px;font-weight:700;transition:.15s;font-family:var(--fu)}
+.chkbtn:hover{opacity:.85}
+.rstbtn{background:var(--surface2);border:1px solid var(--border2);color:var(--muted);padding:10px 16px;border-radius:10px;cursor:pointer;font-size:13px;transition:.15s;font-family:var(--fu);font-weight:600}
+.rstbtn:hover{border-color:var(--danger);color:var(--danger)}
+.expbtn{background:rgba(255,184,0,.1);border:1px solid rgba(255,184,0,.3);color:var(--warn);padding:10px 16px;border-radius:10px;cursor:pointer;font-size:13px;transition:.15s;font-family:var(--fu);font-weight:700;margin-left:auto}
+.expbtn:hover{background:rgba(255,184,0,.2);border-color:var(--warn)}
+.rbox{border-radius:11px;padding:12px 16px;margin-top:4px;font-size:14px;font-weight:700;display:none}
+.rbox.ok{background:rgba(0,229,176,.09);border:1px solid rgba(0,229,176,.3);color:var(--accent2);display:block}
+.rbox.ng{background:rgba(255,69,96,.08);border:1px solid rgba(255,69,96,.25);color:var(--danger);display:block}
+.twrap{margin-top:16px}
+.thdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.ttl{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;display:flex;align-items:center;gap:8px;font-family:var(--fm)}
+.tdots{display:flex;gap:5px;align-items:center}.tdd{width:9px;height:9px;border-radius:50%}.tdd1{background:#ff5f57}.tdd2{background:#febc2e}.tdd3{background:#28c840}
+.clrbtn{font-size:11px;color:var(--muted);background:none;border:none;cursor:pointer;padding:3px 8px;font-family:var(--fm)}
+.terminal{background:#04060e;border:1px solid var(--border);border-radius:12px;padding:14px 16px;font-family:var(--fm);font-size:12.5px;min-height:110px;max-height:280px;overflow-y:auto;line-height:1.7}
+.lo{white-space:pre-wrap;word-break:break-all;color:#d0dbff}.le{color:var(--danger);white-space:pre-wrap;word-break:break-all}.li{color:var(--muted);font-style:italic}.lp{color:var(--accent2);white-space:pre-wrap}
+.iover{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:200;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.imodal{background:var(--surface);border:1px solid var(--border2);border-radius:16px;padding:24px;width:380px;max-width:92vw}
+.imodal h3{font-size:14px;font-weight:700;margin-bottom:6px}.imodal p{font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.5}.imodal input{margin-bottom:14px}
+.mbtns{display:flex;gap:9px;justify-content:flex-end}
+.mok{background:var(--accent);border:none;color:#fff;padding:8px 20px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:700;font-family:var(--fu)}
+.mcx{background:var(--surface2);border:1px solid var(--border2);color:var(--muted);padding:8px 15px;border-radius:8px;cursor:pointer;font-size:13px;font-family:var(--fu)}
+::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+<\/style>
+<\/head>
+<body>
+<header>
+  <div class="logo"><span class="py">Py<\/span><span class="puz">Puzzle<\/span><\/div>
+  <span class="badge">โหมดนักเรียน<\/span>
+  <div class="hs"><\/div>
+  <div class="py-status"><span class="pydot loading" id="pydot"><\/span><span id="pytext">กำลังโหลด Python…<\/span><\/div>
+<\/header>
+<div class="app">
+  <div class="name-row"><label>👤 ชื่อนักเรียน:<\/label><input type="text" id="sname" placeholder="กรอกชื่อ-นามสกุล" style="max-width:260px"><\/div>
+  <div id="qnav" class="qnav" style="display:none"><\/div>
+  <div class="qbox"><div class="qtitle" id="qtitle"><\/div><div class="qdesc" id="qdesc"><\/div><\/div>
+  <div class="sgrid">
+    <div><div class="zlabel"><span class="zdot s"><\/span>บล็อกโค้ด (ลากออกไป)<\/div><div class="dzone" id="src-zone" ondragover="dO(event)" ondrop="dDrop(event,'s')" ondragleave="dL(event)"><\/div><\/div>
+    <div><div class="zlabel"><span class="zdot a"><\/span>เรียงคำตอบที่นี่<\/div><div class="dzone az" id="ans-zone" ondragover="dO(event)" ondrop="dDrop(event,'a')" ondragleave="dL(event)"><\/div><\/div>
+  <\/div>
+  <div class="arow">
+    <button class="runbtn" id="runbtn" onclick="runCode()" disabled><span id="ri">▶<\/span><span id="rl">รันโค้ด<\/span><\/button>
+    <button class="chkbtn" onclick="checkAns()">✅ ตรวจข้อนี้<\/button>
+    <button class="rstbtn" onclick="resetQ()">↺ รีเซ็ต<\/button>
+    <button class="expbtn" onclick="exportWork()">📤 ส่งงาน<\/button>
+  <\/div>
+  <div class="rbox" id="rbox"><\/div>
+  <div class="twrap">
+    <div class="thdr"><div class="ttl"><div class="tdots"><div class="tdd tdd1"><\/div><div class="tdd tdd2"><\/div><div class="tdd tdd3"><\/div><\/div>Terminal<\/div><button class="clrbtn" onclick="clrT()">ล้าง<\/button><\/div>
+    <div class="terminal" id="term"><div class="li">>>> กำลังโหลด Python…<\/div><\/div>
+  <\/div>
+<\/div>
+<div class="iover" id="iover" style="display:none">
+  <div class="imodal"><h3>📥 Input<\/h3><p id="iprompt"><\/p><input type="text" id="ifield" onkeydown="if(event.key==='Enter')okI()"><div class="mbtns"><button class="mcx" onclick="cxI()">ยกเลิก<\/button><button class="mok" onclick="okI()">ยืนยัน ↵<\/button><\/div><\/div>
+<\/div>
+<script>
+var ALL_PUZZLES=null,CQ=0,QS=[],dragEl=null,pyodide=null,inputCb=null,LRO='';
+(function(){
+  try{var d=JSON.parse(decodeURIComponent(escape(atob('${encoded}'))));loadAll(d);}catch(e){document.getElementById('qtitle').textContent='โหลดโจทย์ไม่สำเร็จ';}
+})();
+
+async function initPy(){
+  try{
+    pyodide=await loadPyodide();
+    await pyodide.runPythonAsync('import sys,io\\nclass _W(io.RawIOBase):\\n def __init__(self,k):\\n  self._k=k\\n def write(self,b):\\n  t=b.decode("utf-8","replace") if isinstance(b,(bytes,bytearray)) else str(b)\\n  import js;js.tW(self._k,t);return len(b)\\n def readable(self):return False\\n def writable(self):return True\\n def seekable(self):return False\\nsys.stdout=io.TextIOWrapper(io.BufferedWriter(_W("out")),line_buffering=True)\\nsys.stderr=io.TextIOWrapper(io.BufferedWriter(_W("err")),line_buffering=True)');
+    document.getElementById('pydot').className='pydot ok';
+    document.getElementById('pytext').textContent='Python 3 พร้อม';
+    document.getElementById('runbtn').disabled=false;
+    tL('i','>>> Python 3 พร้อมแล้ว');
+  }catch(e){document.getElementById('pytext').textContent='โหลดไม่สำเร็จ';tL('e','โหลด Python ไม่สำเร็จ');}
+}
+initPy();
+
+function tL(t,x){var el=document.getElementById('term');if(!el)return;var d=document.createElement('div');d.className=t==='e'?'le':t==='i'?'li':t==='p'?'lp':'lo';d.textContent=x;el.appendChild(d);el.scrollTop=el.scrollHeight;if(t==='o')LRO+=x+'\\n';if(t==='e')LRO+='[ERROR] '+x+'\\n';}
+window.tW=function(k,x){if(!x)return;x.split('\\n').forEach(function(l,i,a){if(i===a.length-1&&l==='')return;tL(k==='err'?'e':'o',l);});};
+function clrT(){document.getElementById('term').innerHTML='';LRO='';}
+window.jsInput=function(p){return new Promise(function(res){inputCb=res;document.getElementById('iprompt').textContent=p||'ใส่ข้อมูล:';document.getElementById('ifield').value='';document.getElementById('iover').style.display='flex';setTimeout(function(){document.getElementById('ifield').focus();},40);});};
+function okI(){var v=document.getElementById('ifield').value;document.getElementById('iover').style.display='none';tL('p','>>> '+v);if(inputCb){inputCb(v);inputCb=null;}}
+function cxI(){document.getElementById('iover').style.display='none';if(inputCb){inputCb('');inputCb=null;}}
+
+function sh(arr){for(var i=arr.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=arr[i];arr[i]=arr[j];arr[j]=t;}return arr;}
+function loadAll(data){
+  var ps=data.puzzles||[data];
+  ALL_PUZZLES=sh(ps.slice());
+  QS=ALL_PUZZLES.map(function(){return{cr:null,ro:'',dr:false,ab:null,sb:null};});
+  renderNav();loadQ(0);
+}
+function renderNav(){
+  var nav=document.getElementById('qnav');
+  if(!ALL_PUZZLES||ALL_PUZZLES.length<=1){nav.style.display='none';return;}
+  nav.style.display='flex';
+  nav.innerHTML='<span class="qnav-lbl">ข้อ:<\/span>';
+  ALL_PUZZLES.forEach(function(p,i){
+    var b=document.createElement('button');
+    b.className='qbtn'+(i===CQ?' aq':'')+(QS[i].cr===true||QS[i].rs?' dq':QS[i].cr===false?' wq':'');
+    b.textContent=(i+1)+'. '+p.title.slice(0,14);
+    b.onclick=function(){saveQS();loadQ(i);};
+    nav.appendChild(b);
+  });
+}
+function saveQS(){
+  if(!ALL_PUZZLES)return;
+  QS[CQ].ab=[...document.getElementById('ans-zone').querySelectorAll('.cblock')].map(function(b){return{rc:b.dataset.rawcode,oi:b.dataset.origIdx};});
+  QS[CQ].sb=[...document.getElementById('src-zone').querySelectorAll('.cblock')].map(function(b){return{rc:b.dataset.rawcode,oi:b.dataset.origIdx};});
+  QS[CQ].ro=LRO;
+}
+function loadQ(idx){
+  CQ=idx;var p=ALL_PUZZLES[idx];
+  document.getElementById('qtitle').textContent=p.title;
+  document.getElementById('qdesc').textContent=p.desc||'';
+  document.getElementById('rbox').className='rbox';
+  clrT();
+  var src=document.getElementById('src-zone'),ans=document.getElementById('ans-zone');
+  src.innerHTML='';ans.innerHTML='';
+  var st=QS[idx];
+  if(st.ab&&st.ab.length){
+    st.ab.forEach(function(b){ans.appendChild(mCB(b.rc,parseInt(b.oi),(p.nicks||[])[parseInt(b.oi)]||''));});
+    st.sb.forEach(function(b){src.appendChild(mCB(b.rc,parseInt(b.oi),(p.nicks||[])[parseInt(b.oi)]||''));});
+  }else{
+    var items=p.blocks.map(function(c,i){return{c:c,n:(p.nicks||[])[i]||'',i:i};});
+    sh(items).forEach(function(it){src.appendChild(mCB(it.c,it.i,it.n));});
+  }
+  if(st.cr===true){document.getElementById('rbox').className='rbox ok';document.getElementById('rbox').textContent='🎉 ถูกต้อง!';}
+  else if(st.cr===false){document.getElementById('rbox').className='rbox ng';document.getElementById('rbox').textContent='❌ ยังไม่ถูกต้อง';}
+  if(st.ro){LRO=st.ro;st.ro.split('\\n').filter(Boolean).forEach(function(l){var d=document.createElement('div');d.className='lo';d.textContent=l;document.getElementById('term').appendChild(d);});}
+  else tL('i','>>> ข้อ '+(idx+1)+': '+p.title+' — เรียงโค้ดแล้วกด ▶');
+  renderNav();
+}
+function esc2(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function mCB(code,oi,nick){
+  var div=document.createElement('div');div.className='cblock';div.draggable=true;
+  div.dataset.origIdx=oi;div.dataset.indent=0;div.dataset.rawcode=code;
+  var hn=nick&&nick.trim();
+  div.innerHTML='<span class="grip">⠿⠿<\/span><div class="bdisp">'+(hn?'<span class="bnick">📦 '+esc2(nick)+'<\/span>':'')+'<span class="bcode">'+esc2(code)+'<\/span>'+(hn?'<span class="btog" onclick="tog(this)">▸ ดูโค้ด<\/span>':'')+'<\/div><div class="ictl"><button class="ibtn" onclick="ci(this,-1)">←<\/button><span class="ilvl">0<\/span><button class="ibtn" onclick="ci(this,1)">→<\/button><\/div>';
+  if(hn)div.querySelector('.bcode').style.display='none';
+  div.addEventListener('dragstart',function(){dragEl=div;setTimeout(function(){div.classList.add('dragging');},0);});
+  div.addEventListener('dragend',function(){div.classList.remove('dragging');});
+  return div;
+}
+function tog(el){var c=el.parentElement.querySelector('.bcode');var h=c.style.display==='none';c.style.display=h?'block':'none';el.textContent=h?'▾ ซ่อนโค้ด':'▸ ดูโค้ด';}
+function ci(btn,d){var b=btn.closest('.cblock');var lv=Math.max(0,Math.min(6,parseInt(b.dataset.indent||0)+d));b.dataset.indent=lv;btn.parentElement.querySelector('.ilvl').textContent=lv;var raw=b.dataset.rawcode.replace(/^ +/,'');var ind='    '.repeat(lv)+raw;b.dataset.rawcode=ind;b.querySelector('.bcode').textContent=ind;}
+function dO(e){e.preventDefault();e.currentTarget.classList.add('over');}
+function dL(e){e.currentTarget.classList.remove('over');}
+function dDrop(e,z){e.preventDefault();e.currentTarget.classList.remove('over');if(!dragEl)return;var t=document.getElementById(z==='a'?'ans-zone':'src-zone');var af=dAf(t,e.clientY);if(af)t.insertBefore(dragEl,af);else t.appendChild(dragEl);dragEl=null;}
+function dAf(c,y){return[...c.querySelectorAll('.cblock:not(.dragging)')].reduce(function(cl,ch){var b=ch.getBoundingClientRect();var o=y-b.top-b.height/2;return(o<0&&o>cl.offset)?{offset:o,element:ch}:cl;},{offset:-Infinity}).element;}
+function checkAns(){
+  if(!ALL_PUZZLES)return;
+  var p=ALL_PUZZLES[CQ];
+  var placed=[...document.getElementById('ans-zone').querySelectorAll('.cblock')];
+  if(!placed.length){alert('กรุณาลากโค้ดมาเรียงก่อน');return;}
+  var so=placed.map(function(b){return parseInt(b.dataset.origIdx);});
+  var ok=JSON.stringify(so)===JSON.stringify(p.answerOrder);
+  QS[CQ].cr=ok;
+  var rb=document.getElementById('rbox');
+  if(ok){rb.className='rbox ok';rb.textContent='🎉 ถูกต้อง!';}
+  else{rb.className='rbox ng';rb.textContent='❌ ยังไม่ถูกต้อง — ลำดับ: ['+so.map(function(i){return i+1;}).join(',')+']';}
+  renderNav();
+}
+function resetQ(){if(!ALL_PUZZLES)return;QS[CQ]={cr:null,ro:'',dr:false,ab:null,sb:null,rs:false};loadQ(CQ);}
+
+async function runCode(){
+  if(!pyodide){tL('e','Python ยังไม่พร้อม');return;}
+  var cbs=[...document.getElementById('ans-zone').querySelectorAll('.cblock')];
+  if(!cbs.length){tL('e','กรุณาลากโค้ดมาเรียงก่อน');return;}
+  var lines=cbs.map(function(b){return b.dataset.rawcode||b.querySelector('.bcode').textContent;});
+  var code=lines.join('\\n');
+  clrT();
+  tL('i','--- โค้ดที่รัน ---');
+  lines.forEach(function(l){tL('p',l);});
+  tL('i','--- ผลลัพธ์ ---');
+  var btn=document.getElementById('runbtn');btn.disabled=true;
+  document.getElementById('ri').textContent='⏳';document.getElementById('rl').textContent='กำลังรัน…';
+  try{
+    await pyodide.runPythonAsync('import builtins,js,sys\\nasync def _ai(p=""):\\n sys.stdout.flush()\\n r=await js.jsInput(str(p))\\n return str(r)\\nbuiltins.input=_ai');
+    var ind=code.split('\\n').map(function(l){return '    '+l;}).join('\\n');
+    var w='import asyncio\\nasync def __um__():\\n'+ind+'\\nawait __um__()';
+    await pyodide.runPythonAsync(w);
+    tL('i','--- จบการทำงาน ✓ ---');
+    QS[CQ].dr=true;QS[CQ].ro=LRO;
+    if(!QS[CQ].rs){QS[CQ].rs=true;var ms=ALL_PUZZLES[CQ].maxScore||10;tL('i','🎯 รันสำเร็จ! ได้รับ '+ms+' คะแนน');}
+    renderNav();
+  }catch(err){
+    var msg=String(err.message||err);
+    var cl=msg.split('\\n').filter(function(l){return!l.includes('pyodide')&&!l.includes('__um__')&&!l.trim().startsWith('await ');}).join('\\n').trim();
+    tL('e','❌ '+(cl||msg));
+  }
+  btn.disabled=false;document.getElementById('ri').textContent='▶';document.getElementById('rl').textContent='รันโค้ด';
+}
+
+function exportWork(){
+  var name=document.getElementById('sname').value.trim();
+  if(!name){alert('กรุณากรอกชื่อก่อน Export');return;}
+  if(!ALL_PUZZLES){alert('ยังไม่มีโจทย์');return;}
+  saveQS();
+  var results=ALL_PUZZLES.map(function(p,i){
+    var st=QS[i];
+    var ab=st.ab||[];
+    var so=ab.map(function(b){return parseInt(b.oi);});
+    var fc=ab.map(function(b){return b.rc||'';}).join('\\n');
+    return{puzzleTitle:p.title,puzzleIdx:i,answerOrder:so,correctOrder:p.answerOrder,isCorrect:st.cr,didRun:st.dr,runScored:st.rs||false,maxScore:p.maxScore||10,runOutput:(st.ro||'').slice(0,2000),finalCode:fc,puzzleData:p};
+  });
+  var payload={studentName:name,submittedAt:new Date().toISOString(),results:results};
+  var enc=btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+  var prev=results.map(function(r,i){return'=== ข้อ '+(i+1)+': '+r.puzzleTitle+' '+(r.isCorrect===true?'✓':r.isCorrect===false?'✗':'?')+' ===\\n'+(r.finalCode||'(ยังไม่ได้เรียง)');}).join('\\n\\n');
+  function e2(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  var html='<!DOCTYPE html><html lang="th"><head><meta charset="UTF-8"><title>งานของ '+e2(name)+'<\/title><meta name="pypuzzle-submission" content="'+enc+'"><\/head><body style="font-family:monospace;background:#07090f;color:#dde4ff;padding:20px"><h2 style="color:#00e5b0">📄 งาน PyPuzzle — '+e2(name)+'<\/h2><p style="color:#5a6494;font-size:12px;margin:6px 0 14px">ส่งเมื่อ: '+new Date().toLocaleString('th-TH')+'<\/p><pre style="background:#060810;padding:14px;border-radius:8px;border:1px solid #2a3252;font-size:13px;overflow-x:auto;line-height:1.6">'+e2(prev)+'<\/pre><\/body><\/html>';
+  var a=document.createElement('a');a.href='data:text/html;charset=utf-8,'+encodeURIComponent(html);a.download='งาน_'+name.replace(/\\s+/g,'_')+'_PyPuzzle.html';a.click();
+  alert('✅ ส่งงานสำเร็จ! ส่งไฟล์นี้ให้ครูตรวจได้เลย');
+}
+<\/script>
+<\/body>
+<\/html>`;
+}
+
+/* ══════════════════════ UTILS ══════════════════════ */
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function downloadHTML(content, filename) {
+  const a = document.createElement('a');
+  a.href = 'data:text/html;charset=utf-8,' + encodeURIComponent(content);
+  a.download = filename; a.click();
+}
+
+/* ══════════════════════ INIT SAMPLE ══════════════════════ */
+// Pre-load 2 sample puzzles
+puzzleBank = [
+  {
+    title: 'ข้อ 1: รับค่าและคำนวณ',
+    desc: 'เรียงโค้ดให้โปรแกรมรับค่าสองจำนวน แล้วแสดงผลรวม',
+    blocks: [
+      '# 1. รับค่าจากคีย์บอร์ดและเปลี่ยนเป็นตัวเลข (int)',
+      'x = int(input("ใส่ตัวเลขตัวที่ 1: "))',
+      'y = int(input("ใส่ตัวเลขตัวที่ 2: "))',
+      '# 2. นำข้อมูลมาคำนวณ (ประมวลผล)',
+      'result = x + y',
+      '# 3. แสดงผลลัพธ์',
+      'print("ผลรวมของสองจำนวนคือ:", result)',
+    ],
+    nicks: ['คอมเมนต์ขั้น 1','รับค่า x','รับค่า y','คอมเมนต์ขั้น 2','คำนวณ','คอมเมนต์ขั้น 3','แสดงผล'],
+    answerOrder: [0,1,2,3,4,5,6],
+    maxScore: 10,
+  },
+  {
+    title: 'ข้อ 2: ผลรวม 1 ถึง 10',
+    desc: 'เรียงบล็อกโค้ดให้ถูกต้อง เพื่อให้โปรแกรมแสดงผลรวมของเลข 1 ถึง 10',
+    blocks: [
+      'total = 0',
+      'for i in range(1, 11):',
+      '    total += i',
+      'print("ผลรวม =", total)',
+    ],
+    nicks: ['เริ่มต้นตัวแปร','วนลูป','บวกสะสม','แสดงผล'],
+    answerOrder: [0,1,2,3],
+    maxScore: 10,
+  }
+];
+renderPuzzleList();
 </script>
 </body>
 </html>
